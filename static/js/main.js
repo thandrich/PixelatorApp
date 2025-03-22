@@ -87,8 +87,19 @@ function initializeApp() {
         }, 1000);
     });
 
+    // Store the last valid selection so we can keep it if dialog is canceled
+    let lastValidImageFile = null;
+    
     fileElem.addEventListener('change', () => {
-        handleFiles(fileElem.files);
+        // If a file was selected, process it
+        if (fileElem.files.length > 0) {
+            handleFiles(fileElem.files);
+            // Store this file for future reference
+            lastValidImageFile = fileElem.files[0];
+        } else if (lastValidImageFile) {
+            // If dialog was canceled and we had a previous file, make sure the button stays enabled
+            processButton.disabled = false;
+        }
     });
 
     function handleFiles(files) {
@@ -125,6 +136,7 @@ function initializeApp() {
 
     function clearFileInput() {
         fileElem.value = '';
+        lastValidImageFile = null;
         preview.innerHTML = '';
         processButton.disabled = true;
     }
@@ -242,7 +254,14 @@ function initializeApp() {
     // Process image when button is clicked
     if (processButton) {
         processButton.addEventListener('click', () => {
-            if (fileElem.files.length === 0) {
+            // Use either the current file or the last valid file
+            let fileToProcess = null;
+            
+            if (fileElem.files.length > 0) {
+                fileToProcess = fileElem.files[0];
+            } else if (lastValidImageFile) {
+                fileToProcess = lastValidImageFile;
+            } else {
                 showError('Please select an image first.');
                 return;
             }
@@ -253,7 +272,7 @@ function initializeApp() {
             
             // Create form data
             const formData = new FormData();
-            formData.append('file', fileElem.files[0]);
+            formData.append('file', fileToProcess);
             formData.append('palette', paletteSelect.value);
             formData.append('quantization_mode', quantizationSelect.value);
             formData.append('max_resolution', document.getElementById('max_resolution').value);
