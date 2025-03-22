@@ -1,0 +1,115 @@
+Image Modification Application Specification
+1. Introduction
+This document outlines the specifications for an image modification application that allows users to apply various pixel art-style transformations to images using a Python backend and a user-friendly HTML/JS frontend. The application will enable users to upload images, select modification parameters such as color palette and quantization method, and download the resulting image.
+2. Goals
+Intuitive User Interface: The application should be easy to understand and use for individuals with varying levels of technical expertise.
+Clear Workflow: The process of uploading, modifying, and downloading images should be straightforward and logical.
+Real-time Preview (Optional but Recommended): If feasible, provide a preview of the modified image as the user adjusts parameters.
+Robust Backend: The Python backend should efficiently process images and handle potential errors gracefully.
+Maintainability: The codebase should be well-structured and easy to maintain and extend in the future.
+3. Target Audience
+Individuals interested in creating pixel art effects from regular images.
+Hobbyists and enthusiasts of retro aesthetics.
+Users who need to quickly convert images to a limited color palette for various purposes.
+4. Functional Requirements
+Image Upload:
+Users should be able to upload image files (e.g., JPG, JPEG, PNG, BMP) from their local storage.
+The application should provide clear visual feedback upon successful upload.
+There should be a mechanism to handle large file sizes (e.g., progress bar, size limits).
+Parameter Selection:
+Color Palette:
+Users should be able to select from a list of color palettes 
+These color palettes are stored as hex files in a specific directory.
+Display the selected palette visually (swatches of colors).
+Quantization Mode:
+Users should be able to choose from the following quantization modes:
+Contrast: (Based on quantize_with_edge_emphasis) - Emphasizes edges while quantizing.
+Natural: (Based on quantize_to_palette_cielab) - Attempts a more natural color reduction using CIELAB color space.
+K-Means: (Based on quantize_kmeans) - Uses k-means clustering to find dominant colors and then matches them to the palette.
+K-Means (Brightness): (Based on quantize_kmeans_full) - Uses k-means and maps clusters to the palette based on brightness.
+Provide a brief description or tooltip for each quantization mode to help users understand their differences.
+Upscale Factor:
+Users should be able to select an integer upscale factor (e.g., 1, 2, 4, 8, up to a reasonable limit like 20).
+Clearly label this option as for "pixel art" upscaling.
+Maximum Resolution: The user should be able to set the max_resolution parameter to define the maximum resolution of the output image resulting in the desired pixelated effect. The standard setting should be 512 x 512, other values should be offered as preselection (128 x 128, 256 x 256,..) and the user should be able to set their own resolution.
+Image Modification Execution:
+A clear "Apply" or "Convert" button should trigger the image modification process.
+The application should provide visual feedback during processing (e.g., a loading indicator).
+Result Display:
+The modified image should be displayed prominently on the frontend after processing is complete.
+Display the original image alongside the modified image for easy comparison (optional, but highly recommended).
+Download:
+Users should be able to download the modified image as a PNG file.
+The download should be initiated by a clearly labeled "Download" button.
+The downloaded filename should be informative (e.g., original_filename_quantizationmode_palettename_upscalefactor.png).
+Error Handling:
+The application should gracefully handle invalid file uploads (e.g., incorrect format, size exceeding limits).
+Informative error messages should be displayed to the user in case of backend processing failures (e.g., palette file not found).
+Clear Button: A button to clear the current image and reset parameters for a new modification.
+5. Non-Functional Requirements
+Performance: Image processing should be reasonably fast for typical image sizes. The backend should be optimized for the chosen operations.
+Usability: The application should be intuitive and easy to navigate. Users should be able to complete the image modification process without extensive instructions.
+Responsiveness: The frontend should be responsive and adapt to different screen sizes (desktop, tablet).
+Scalability (Future Consideration): While not an immediate requirement, the backend architecture should ideally be designed with potential future scaling in mind.
+Security: Basic security measures should be in place to prevent common web vulnerabilities (though this application likely has minimal security concerns given its nature).
+6. User Interface (UI) Design
+The UI should follow a clean and simple layout. Here's a potential structure:
+Header: Application title ("Pixel Art Image Modifier").
+Main Content Area:
+Step 1: Upload Image:
+A prominent "Choose File" button or a drag-and-drop area for image upload.
+Display the name of the uploaded file.
+A thumbnail preview of the uploaded image (optional, but helpful).
+Step 2: Select Parameters:
+Max resolution:
+A dropdown with values like 64 x 64, 128 x 128, 256 x 256, 512 x 512 (preselected), 1024 x 1024
+The option to define a custom resolution
+Color Palette:
+A dropdown or a visually presented list of available palettes as extracted from the folder containing the hex files.
+Display color swatches for the selected palette.
+An option to "Upload Custom Palette" (if this functionality is implemented) This option should allow for the palette to be named and saved as a hex file in the palette folder.
+Quantization Mode:
+A dropdown or a set of radio buttons for selecting the quantization mode.
+Tooltips or brief descriptions for each mode (e.g., on hover).
+Upscale Factor:
+A dropdown or a number input field to select the upscale factor.
+Label clearly (e.g., "Pixel Art Upscale Factor").
+Step 3: Apply & View:
+A large, clearly labeled "Apply" or "Convert" button.
+A loading indicator (e.g., spinner) displayed during processing.
+Result Area:
+Display the modified image prominently.
+Step 4: Download:
+A prominent "Download" button below the modified image.
+A "Clear" or "New Image" button to start over.
+Footer: (Optional) Copyright information or links.
+Key UI Principles:
+Visual Hierarchy: Use clear headings, labels, and spacing to guide the user.
+Consistency: Maintain a consistent look and feel throughout the application.
+Feedback: Provide clear and timely feedback to the user on their actions (e.g., successful upload, processing status, errors).
+Accessibility: Consider basic accessibility guidelines (e.g., alt text for images, keyboard navigation).
+7. Backend Architecture
+The backend will be built using Python and a web framework like Flask or Django.
+The frontend (HTML, CSS, JavaScript) will communicate with the backend via API calls (likely using RESTful principles).
+When the user uploads an image and submits the parameters:
+The frontend will send the image file and selected parameters to a backend API endpoint.
+The backend will receive the image and parameters.
+The backend will use the provided Python functions (downscale_image, enhance_contrast, quantize_to_palette_cielab, quantize_with_edge_emphasis, quantize_kmeans, quantize_kmeans_full, upscale_image) to process the image according to the selected parameters.
+The backend will then send the processed image back to the frontend. This could be done by encoding the image as a base64 string or by providing a URL to the processed image.
+The frontend will then display the received image to the user.
+For downloading, the frontend can either download the image data received from the backend or request a download from a specific backend endpoint.
+Palette files will be stored on the backend server in a designated directory.
+8. Technology Stack
+Frontend:
+HTML5
+CSS3
+JavaScript
+Potentially a JavaScript framework/library like React, Vue.js, or Angular for a more interactive and structured frontend.
+Backend:
+Python 3
+Flask or Django (for the web framework and API)
+PIL (Pillow) for basic image handling (already imported)
+scikit-image for color conversions and feature detection (already imported)
+scikit-learn for k-means clustering (already imported)
+imageio for reading and writing image files (already imported)
+numpy for numerical operations (already imported)
