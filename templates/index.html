@@ -48,13 +48,9 @@
                             <option value="{{ palette.id }}">{{ palette.name }}</option>
                             {% endfor %}
                         </select>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <div id="palette-preview" class="d-flex flex-wrap">
+                        <div class="mt-2">
+                            <div id="palette-preview" class="d-flex flex-wrap mb-2">
                                 <!-- Palette colors will be shown here -->
-                            </div>
-                            <div>
-                                <a href="#" id="import-palette-link" class="btn btn-sm btn-outline-secondary">Import Custom</a>
-                                <input type="file" id="import-palette-file" accept=".hex,.txt" class="d-none">
                             </div>
                         </div>
                     </div>
@@ -137,6 +133,12 @@
                     <li>Applying color quantization to limit the color palette</li>
                     <li>Optionally upscaling the result to emphasize the pixel style</li>
                 </ol>
+                
+                <hr class="my-4">
+                <div class="text-center">
+                    <a href="#" id="import-palette-link" class="btn btn-sm btn-secondary opacity-75">Import Additional Palettes</a>
+                    <input type="file" id="import-palette-file" accept=".hex,.txt" class="d-none">
+                </div>
             </div>
         </div>
     </div>

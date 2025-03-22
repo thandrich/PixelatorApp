@@ -65,12 +65,26 @@ function initializeApp() {
     }
 
     // Handle file selection via button
-    fileSelect.addEventListener('click', () => {
+    // First, remove any existing event listeners to prevent duplicates
+    const oldFileSelect = fileSelect.cloneNode(true);
+    fileSelect.parentNode.replaceChild(oldFileSelect, fileSelect);
+    
+    // Reassign the variable to the new element
+    const newFileSelect = document.getElementById('fileSelect');
+    newFileSelect.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         fileElem.click();
-    });
+    }, { once: true });
 
-    fileElem.addEventListener('change', () => {
-        handleFiles(fileElem.files);
+    // Remove and reattach the change listener to prevent duplicates
+    const oldFileElem = fileElem.cloneNode(true);
+    fileElem.parentNode.replaceChild(oldFileElem, fileElem);
+    
+    // Reassign the variable to the new element
+    const newFileElem = document.getElementById('fileElem');
+    newFileElem.addEventListener('change', () => {
+        handleFiles(newFileElem.files);
     });
 
     function handleFiles(files) {
@@ -165,19 +179,59 @@ function initializeApp() {
     if (quantizationSelect && quantizationDescription) {
         quantizationSelect.addEventListener('change', () => {
             const selectedOption = quantizationSelect.options[quantizationSelect.selectedIndex];
-            const selectedMode = window.serverData.quantizationModes.find(mode => mode.value === selectedOption.value);
-            
-            if (selectedMode) {
-                quantizationDescription.textContent = selectedMode.description;
+            // Check if serverData exists first
+            if (window.serverData && window.serverData.quantizationModes) {
+                const selectedMode = window.serverData.quantizationModes.find(mode => mode.value === selectedOption.value);
+                if (selectedMode) {
+                    quantizationDescription.textContent = selectedMode.description;
+                }
+            } else {
+                // Fallback to hardcoded descriptions if serverData is not available
+                switch(selectedOption.value) {
+                    case 'contrast':
+                        quantizationDescription.textContent = 'Emphasizes edges while quantizing';
+                        break;
+                    case 'natural':
+                        quantizationDescription.textContent = 'Attempts a more natural color reduction using CIELAB color space';
+                        break;
+                    case 'kmeans':
+                        quantizationDescription.textContent = 'Uses k-means clustering to find dominant colors and match to palette';
+                        break;
+                    case 'kmeans_brightness':
+                        quantizationDescription.textContent = 'Uses k-means and maps clusters based on brightness';
+                        break;
+                    default:
+                        quantizationDescription.textContent = '';
+                }
             }
         });
         
         // Set initial quantization description
         const initialOption = quantizationSelect.options[quantizationSelect.selectedIndex];
-        const initialMode = window.serverData.quantizationModes.find(mode => mode.value === initialOption.value);
-        
-        if (initialMode) {
-            quantizationDescription.textContent = initialMode.description;
+        // Check if serverData exists first
+        if (window.serverData && window.serverData.quantizationModes) {
+            const initialMode = window.serverData.quantizationModes.find(mode => mode.value === initialOption.value);
+            if (initialMode) {
+                quantizationDescription.textContent = initialMode.description;
+            }
+        } else {
+            // Fallback to hardcoded descriptions if serverData is not available
+            switch(initialOption.value) {
+                case 'contrast':
+                    quantizationDescription.textContent = 'Emphasizes edges while quantizing';
+                    break;
+                case 'natural':
+                    quantizationDescription.textContent = 'Attempts a more natural color reduction using CIELAB color space';
+                    break;
+                case 'kmeans':
+                    quantizationDescription.textContent = 'Uses k-means clustering to find dominant colors and match to palette';
+                    break;
+                case 'kmeans_brightness':
+                    quantizationDescription.textContent = 'Uses k-means and maps clusters based on brightness';
+                    break;
+                default:
+                    quantizationDescription.textContent = '';
+            }
         }
     }
     
@@ -241,18 +295,32 @@ function initializeApp() {
     
     // Handle palette import
     if (importPaletteLink && importPaletteInput) {
-        importPaletteLink.addEventListener('click', () => {
-            importPaletteInput.click();
-        });
+        // First, remove any existing event listeners to prevent duplicates
+        const oldImportPaletteLink = importPaletteLink.cloneNode(true);
+        importPaletteLink.parentNode.replaceChild(oldImportPaletteLink, importPaletteLink);
         
-        importPaletteInput.addEventListener('change', () => {
-            if (importPaletteInput.files.length > 0) {
-                const file = importPaletteInput.files[0];
+        // Reassign the variable to the new element
+        const newImportPaletteLink = document.getElementById('import-palette-link');
+        newImportPaletteLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            importPaletteInput.click();
+        }, { once: true });
+        
+        // Remove and reattach the change listener to prevent duplicates
+        const oldImportPaletteInput = importPaletteInput.cloneNode(true);
+        importPaletteInput.parentNode.replaceChild(oldImportPaletteInput, importPaletteInput);
+        
+        // Reassign the variable to the new element
+        const newImportPaletteInput = document.getElementById('import-palette-file');
+        newImportPaletteInput.addEventListener('change', () => {
+            if (newImportPaletteInput.files.length > 0) {
+                const file = newImportPaletteInput.files[0];
                 
                 // Check if file is a text/hex file
                 if (!file.name.endsWith('.hex') && !file.name.endsWith('.txt')) {
                     showError('Please select a valid palette file (.hex or .txt)');
-                    importPaletteInput.value = '';
+                    newImportPaletteInput.value = '';
                     return;
                 }
                 
