@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+
+{% block title %}Pixel Art Generator{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Pixel Art Generator</h1>
+                <p class="card-text">
+                    Transform your photos into pixel art using various color palettes and stylization options.
+                    Upload an image, choose your desired settings, and generate a pixelated version of your image.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Upload Image</h5>
+            </div>
+            <div class="card-body">
+                <div id="drop-area" class="drop-area mb-3">
+                    <form class="my-form">
+                        <p>Drag & drop your image here or</p>
+                        <input type="file" id="fileElem" accept="image/*" class="d-none">
+                        <button type="button" id="fileSelect" class="btn btn-primary">Select Image</button>
+                    </form>
+                    <div id="preview" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="settings-form">
+                    <div class="mb-3">
+                        <label for="palette" class="form-label">Color Palette</label>
+                        <select class="form-select" id="palette" name="palette">
+                            {% for palette in palettes %}
+                            <option value="{{ palette.id }}">{{ palette.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div id="palette-preview" class="d-flex flex-wrap mt-2">
+                            <!-- Palette colors will be shown here -->
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="quantization_mode" class="form-label">Quantization Mode</label>
+                        <select class="form-select" id="quantization_mode" name="quantization_mode">
+                            {% for mode in quantization_modes %}
+                            <option value="{{ mode.value }}" {% if mode.value == 'contrast' %}selected{% endif %}>{{ mode.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text" id="quantization_description">Emphasizes edges while quantizing</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="max_resolution" class="form-label">Resolution</label>
+                        <select class="form-select" id="max_resolution" name="max_resolution">
+                            {% for res in resolution_presets %}
+                            <option value="{{ res.value }}" {% if res.default %}selected{% endif %}>{{ res.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="upscale_factor" class="form-label">Upscale Factor</label>
+                        <select class="form-select" id="upscale_factor" name="upscale_factor">
+                            {% for factor in upscale_factors %}
+                            <option value="{{ factor }}" {% if factor == 1 %}selected{% endif %}>{{ factor }}x</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Higher factors will increase the final image size.</div>
+                    </div>
+
+                    <button type="button" id="process-button" class="btn btn-primary w-100 mt-2" disabled>
+                        Process Image
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Result</h5>
+            </div>
+            <div class="card-body">
+                <div id="result-container" class="text-center">
+                    <p class="text-muted">Processed image will appear here</p>
+                </div>
+                <div id="download-container" class="text-center mt-3" style="display: none;">
+                    <a id="download-link" class="btn btn-success" download>Download Image</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">About Pixel Art</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    Pixel art is a form of digital art where images are created and edited at the pixel level. 
+                    It has its roots in early video games and computer systems with limited graphical capabilities.
+                </p>
+                <p>
+                    The key characteristics of pixel art include:
+                </p>
+                <ul>
+                    <li>Limited color palettes</li>
+                    <li>Deliberate placement of individual pixels</li>
+                    <li>Clean, crisp edges</li>
+                    <li>Stylized representation of subjects</li>
+                </ul>
+                <p>
+                    This tool helps you transform your photos into pixel art by:
+                </p>
+                <ol>
+                    <li>Downscaling your image to create pixelation</li>
+                    <li>Applying color quantization to limit the color palette</li>
+                    <li>Optionally upscaling the result to emphasize the pixel style</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading spinner modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 id="loadingModalLabel">Processing your image...</h5>
+                <p class="mb-0 text-muted">This may take a few moments depending on the image size and settings.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="error-message">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .drop-area {
+        border: 2px dashed var(--bs-border-color);
+        border-radius: 0.375rem;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .drop-area.highlight {
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+        border-color: var(--bs-primary);
+    }
+    #preview img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 0.375rem;
+    }
+    .color-swatch {
+        width: 24px;
+        height: 24px;
+        margin: 2px;
+        border: 1px solid var(--bs-border-color);
+        border-radius: 4px;
+        display: inline-block;
+    }
+    #result-container img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.375rem;
+    }
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // DOM Elements
+    const dropArea = document.getElementById('drop-area');
+    const fileElem = document.getElementById('fileElem');
+    const fileSelect = document.getElementById('fileSelect');
+    const preview = document.getElementById('preview');
+    const processButton = document.getElementById('process-button');
+    const paletteSelect = document.getElementById('palette');
+    const palettePreview = document.getElementById('palette-preview');
+    const quantizationSelect = document.getElementById('quantization_mode');
+    const quantizationDescription = document.getElementById('quantization_description');
+    const resultContainer = document.getElementById('result-container');
+    const downloadContainer = document.getElementById('download-container');
+    const downloadLink = document.getElementById('download-link');
+    const settingsForm = document.getElementById('settings-form');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+    const errorMessage = document.getElementById('error-message');
+
+    // Prevent defaults for drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // Highlight drop area when dragging over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+        dropArea.classList.add('highlight');
+    }
+
+    function unhighlight() {
+        dropArea.classList.remove('highlight');
+    }
+
+    // Handle dropped files
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            handleFiles(files);
+        }
+    }
+
+    // Handle file selection via button
+    fileSelect.addEventListener('click', () => {
+        fileElem.click();
+    });
+
+    fileElem.addEventListener('change', () => {
+        handleFiles(fileElem.files);
+    });
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            const file = files[0];
+            
+            // Check if file is an image
+            if (!file.type.match('image.*')) {
+                showError('Please select an image file.');
+                clearFileInput();
+                return;
+            }
+            
+            // Clear any previous preview
+            preview.innerHTML = '';
+            
+            // Create preview image
+            const img = document.createElement('img');
+            img.classList.add('mb-2');
+            img.file = file;
+            preview.appendChild(img);
+            
+            // Read the file
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            // Enable the process button
+            processButton.disabled = false;
+        }
+    }
+
+    function clearFileInput() {
+        fileElem.value = '';
+        preview.innerHTML = '';
+        processButton.disabled = true;
+    }
+
+    // Load palette swatches when a palette is selected
+    paletteSelect.addEventListener('change', () => {
+        loadPaletteSwatches(paletteSelect.value);
+    });
+
+    function loadPaletteSwatches(paletteId) {
+        fetch(`/palette/${paletteId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load palette');
+                }
+                return response.json();
+            })
+            .then(data => {
+                palettePreview.innerHTML = '';
+                
+                data.colors.forEach(color => {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch';
+                    swatch.style.backgroundColor = `#${color}`;
+                    swatch.title = `#${color}`;
+                    palettePreview.appendChild(swatch);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading palette:', error);
+                palettePreview.innerHTML = '<p class="text-danger">Failed to load palette.</p>';
+            });
+    }
+
+    // Update quantization description when mode is changed
+    quantizationSelect.addEventListener('change', () => {
+        const selectedOption = quantizationSelect.options[quantizationSelect.selectedIndex];
+        const modes = {{ quantization_modes|tojson }};
+        const selectedMode = modes.find(mode => mode.value === selectedOption.value);
+        
+        if (selectedMode) {
+            quantizationDescription.textContent = selectedMode.description;
+        }
+    });
+
+    // Process image when button is clicked
+    processButton.addEventListener('click', () => {
+        if (fileElem.files.length === 0) {
+            showError('Please select an image first.');
+            return;
+        }
+        
+        // Show loading modal
+        loadingModal.show();
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('file', fileElem.files[0]);
+        formData.append('palette', paletteSelect.value);
+        formData.append('quantization_mode', quantizationSelect.value);
+        formData.append('max_resolution', document.getElementById('max_resolution').value);
+        formData.append('upscale_factor', document.getElementById('upscale_factor').value);
+        
+        // Send the request
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Failed to process image');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Hide loading modal
+            loadingModal.hide();
+            
+            // Show result
+            resultContainer.innerHTML = `
+                <img src="${data.processed_image_url}" alt="Processed Image" class="img-fluid">
+                <p class="mt-2">Processed with ${data.palette_name} palette</p>
+            `;
+            
+            // Show download button
+            downloadContainer.style.display = 'block';
+            downloadLink.href = data.processed_image_url;
+            downloadLink.download = `pixel_art_${Date.now()}.png`;
+        })
+        .catch(error => {
+            // Hide loading modal
+            loadingModal.hide();
+            
+            // Show error
+            showError(error.message);
+        });
+    });
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorModal.show();
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        // Load initial palette swatches
+        if (paletteSelect.value) {
+            loadPaletteSwatches(paletteSelect.value);
+        }
+        
+        // Set initial quantization description
+        const modes = {{ quantization_modes|tojson }};
+        const selectedMode = modes.find(mode => mode.value === quantizationSelect.value);
+        
+        if (selectedMode) {
+            quantizationDescription.textContent = selectedMode.description;
+        }
+    });
+</script>
+{% endblock %}

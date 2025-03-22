@@ -1,0 +1,103 @@
+/* General Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Upload Area Styles */
+.upload-area {
+    border: 2px dashed var(--bs-secondary);
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover, .upload-area.drag-over {
+    border-color: var(--bs-primary);
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Steps Container */
+.steps-container .step {
+    border-left: 2px solid var(--bs-primary);
+    padding-left: 1rem;
+    position: relative;
+}
+
+.steps-container .step:last-child {
+    border-left: 2px solid transparent;
+}
+
+/* Palette Swatches */
+.palette-swatch {
+    width: 25px;
+    height: 25px;
+    margin: 2px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Image Display */
+#original-image, #processed-image {
+    max-height: 400px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Loading Spinner */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* File Input */
+input[type="file"] {
+    border: 1px solid var(--bs-secondary);
+}
+
+/* Custom Resolution Inputs */
+#custom-width, #custom-height {
+    text-align: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767.98px) {
+    .col-md-6 {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Tooltip improvements */
+.tooltip .tooltip-inner {
+    max-width: 300px;
+    padding: 8px 12px;
+}
+
+/* Card hover effect */
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+/* Make buttons more prominent */
+.btn-primary, .btn-success {
+    padding: 0.5rem 1.5rem;
+}
+
+/* Add more breathing room to the form elements */
+.form-label {
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+/* Custom styles for the palette preview */
+#palette-preview {
+    max-height: 100px;
+    overflow-y: auto;
+}

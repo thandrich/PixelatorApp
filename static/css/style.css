@@ -1,0 +1,46 @@
+/* Custom styles for the Pixel Art Generator */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.drop-area {
+    border: 2px dashed var(--bs-border-color);
+    border-radius: 0.375rem;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.drop-area.highlight {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    border-color: var(--bs-primary);
+}
+
+#preview img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 0.375rem;
+}
+
+.color-swatch {
+    width: 24px;
+    height: 24px;
+    margin: 2px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 4px;
+    display: inline-block;
+}
+
+#result-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.375rem;
+}
