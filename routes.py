@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from app import db
 from models import Palette, ProcessedImage
 from image_processor import process_image
-from palette_manager import get_all_palettes, get_palette_by_id, get_palette_colors
+from palette_manager import get_all_palettes, get_palette_by_id, get_palette_colors, add_palette
 from utils import allowed_file, parse_resolution
 
 def register_routes(app):
@@ -124,6 +124,46 @@ def register_routes(app):
         """Get all available palettes."""
         palettes = get_all_palettes()
         return jsonify([palette.to_dict() for palette in palettes])
+        
+    @app.route('/palette/import', methods=['POST'])
+    def import_palette():
+        """Import a custom palette."""
+        # Check if the post request has the file part
+        if 'palette_file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+            
+        file = request.files['palette_file']
+        
+        # Check if the user did not select a file
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+            
+        # Check if file has a valid extension (.hex or .txt)
+        if not file.filename.endswith(('.hex', '.txt')):
+            return jsonify({'error': 'Invalid file format. Please upload a .hex or .txt file.'}), 400
+            
+        # Get palette name from form or use filename without extension
+        name = request.form.get('name', file.filename.rsplit('.', 1)[0])
+        description = request.form.get('description', f"Custom palette: {name}")
+        
+        # Add the palette to the database
+        palette = add_palette(
+            name=name,
+            palette_file=file,
+            description=description,
+            is_default=False,
+            palettes_dir=app.config['UPLOADED_PALETTES_DEST']
+        )
+        
+        if not palette:
+            return jsonify({'error': 'Failed to import palette'}), 500
+            
+        # Return the imported palette details
+        return jsonify({
+            'id': palette.id,
+            'name': palette.name,
+            'description': palette.description
+        })
     
     @app.errorhandler(404)
     def page_not_found(e):

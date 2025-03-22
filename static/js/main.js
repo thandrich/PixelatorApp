@@ -162,19 +162,23 @@ function initializeApp() {
     }
     
     // Update quantization description when mode is changed
-    if (quantizationSelect) {
+    if (quantizationSelect && quantizationDescription) {
         quantizationSelect.addEventListener('change', () => {
             const selectedOption = quantizationSelect.options[quantizationSelect.selectedIndex];
-            fetch('/api/quantization-modes')
-                .then(response => response.json())
-                .then(modes => {
-                    const selectedMode = modes.find(mode => mode.value === selectedOption.value);
-                    if (selectedMode && quantizationDescription) {
-                        quantizationDescription.textContent = selectedMode.description;
-                    }
-                })
-                .catch(error => console.error('Error loading quantization modes:', error));
+            const selectedMode = window.serverData.quantizationModes.find(mode => mode.value === selectedOption.value);
+            
+            if (selectedMode) {
+                quantizationDescription.textContent = selectedMode.description;
+            }
         });
+        
+        // Set initial quantization description
+        const initialOption = quantizationSelect.options[quantizationSelect.selectedIndex];
+        const initialMode = window.serverData.quantizationModes.find(mode => mode.value === initialOption.value);
+        
+        if (initialMode) {
+            quantizationDescription.textContent = initialMode.description;
+        }
     }
     
     // Process image when button is clicked
