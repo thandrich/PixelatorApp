@@ -18,6 +18,12 @@ function initializeApp() {
     const palettePreview = document.getElementById('palette-preview');
     const quantizationSelect = document.getElementById('quantization_mode');
     const quantizationDescription = document.getElementById('quantization_description');
+    const resultContainer = document.getElementById('result-container');
+    const downloadContainer = document.getElementById('download-container');
+    const downloadLink = document.getElementById('download-link');
+    const settingsForm = document.getElementById('settings-form');
+    const importPaletteLink = document.getElementById('import-palette-link');
+    const importPaletteInput = document.getElementById('import-palette-file');
 
     // Prevent defaults for drag and drop
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -153,5 +159,139 @@ function initializeApp() {
             // Fallback to alert
             alert(message);
         }
+    }
+    
+    // Update quantization description when mode is changed
+    if (quantizationSelect) {
+        quantizationSelect.addEventListener('change', () => {
+            const selectedOption = quantizationSelect.options[quantizationSelect.selectedIndex];
+            fetch('/api/quantization-modes')
+                .then(response => response.json())
+                .then(modes => {
+                    const selectedMode = modes.find(mode => mode.value === selectedOption.value);
+                    if (selectedMode && quantizationDescription) {
+                        quantizationDescription.textContent = selectedMode.description;
+                    }
+                })
+                .catch(error => console.error('Error loading quantization modes:', error));
+        });
+    }
+    
+    // Process image when button is clicked
+    if (processButton) {
+        processButton.addEventListener('click', () => {
+            if (fileElem.files.length === 0) {
+                showError('Please select an image first.');
+                return;
+            }
+            
+            // Show loading modal
+            const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            loadingModal.show();
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', fileElem.files[0]);
+            formData.append('palette', paletteSelect.value);
+            formData.append('quantization_mode', quantizationSelect.value);
+            formData.append('max_resolution', document.getElementById('max_resolution').value);
+            formData.append('upscale_factor', document.getElementById('upscale_factor').value);
+            
+            // Send the request
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Failed to process image');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide loading modal
+                loadingModal.hide();
+                
+                // Show result
+                resultContainer.innerHTML = `
+                    <img src="${data.processed_image_url}" alt="Processed Image" class="img-fluid">
+                    <p class="mt-2">Processed with ${data.palette_name} palette</p>
+                `;
+                
+                // Show download button
+                downloadContainer.style.display = 'block';
+                downloadLink.href = data.processed_image_url;
+                downloadLink.download = `pixel_art_${Date.now()}.png`;
+            })
+            .catch(error => {
+                // Hide loading modal
+                loadingModal.hide();
+                
+                // Show error
+                showError(error.message);
+            });
+        });
+    }
+    
+    // Handle palette import
+    if (importPaletteLink && importPaletteInput) {
+        importPaletteLink.addEventListener('click', () => {
+            importPaletteInput.click();
+        });
+        
+        importPaletteInput.addEventListener('change', () => {
+            if (importPaletteInput.files.length > 0) {
+                const file = importPaletteInput.files[0];
+                
+                // Check if file is a text/hex file
+                if (!file.name.endsWith('.hex') && !file.name.endsWith('.txt')) {
+                    showError('Please select a valid palette file (.hex or .txt)');
+                    importPaletteInput.value = '';
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('palette_file', file);
+                formData.append('name', file.name.replace(/\.[^/.]+$/, '')); // Remove extension for name
+                
+                fetch('/palette/import', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Failed to import palette');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Add the new palette to the select
+                    const option = document.createElement('option');
+                    option.value = data.id;
+                    option.text = data.name;
+                    paletteSelect.add(option);
+                    
+                    // Select the new palette
+                    paletteSelect.value = data.id;
+                    
+                    // Load the new palette swatches
+                    loadPaletteSwatches(data.id);
+                    
+                    // Show success message
+                    alert(`Palette "${data.name}" imported successfully!`);
+                })
+                .catch(error => {
+                    showError(error.message);
+                })
+                .finally(() => {
+                    // Clear the file input
+                    importPaletteInput.value = '';
+                });
+            }
+        });
     }
 }

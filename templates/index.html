@@ -48,8 +48,14 @@
                             <option value="{{ palette.id }}">{{ palette.name }}</option>
                             {% endfor %}
                         </select>
-                        <div id="palette-preview" class="d-flex flex-wrap mt-2">
-                            <!-- Palette colors will be shown here -->
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div id="palette-preview" class="d-flex flex-wrap">
+                                <!-- Palette colors will be shown here -->
+                            </div>
+                            <div>
+                                <a href="#" id="import-palette-link" class="btn btn-sm btn-outline-secondary">Import Custom</a>
+                                <input type="file" id="import-palette-file" accept=".hex,.txt" class="d-none">
+                            </div>
                         </div>
                     </div>
 
