@@ -1,5 +1,9 @@
 // Main JavaScript for Pixel Art Generator
 
+// Global variables to prevent duplicate events
+let fileDialogOpened = false;
+let paletteDialogOpened = false;
+
 // DOM Elements
 document.addEventListener('DOMContentLoaded', function() {
     // Only run this code if these elements exist (they might not on error pages)
@@ -64,27 +68,27 @@ function initializeApp() {
         }
     }
 
-    // Handle file selection via button
-    // First, remove any existing event listeners to prevent duplicates
-    const oldFileSelect = fileSelect.cloneNode(true);
-    fileSelect.parentNode.replaceChild(oldFileSelect, fileSelect);
-    
-    // Reassign the variable to the new element
-    const newFileSelect = document.getElementById('fileSelect');
-    newFileSelect.addEventListener('click', (e) => {
+    // Handle file selection via button with debounce to prevent multiple dialogs
+    fileSelect.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        
+        // Prevent multiple file dialogs from opening at once
+        if (fileDialogOpened) {
+            return;
+        }
+        
+        fileDialogOpened = true;
         fileElem.click();
-    }, { once: true });
+        
+        // Reset after a short delay
+        setTimeout(() => {
+            fileDialogOpened = false;
+        }, 1000);
+    });
 
-    // Remove and reattach the change listener to prevent duplicates
-    const oldFileElem = fileElem.cloneNode(true);
-    fileElem.parentNode.replaceChild(oldFileElem, fileElem);
-    
-    // Reassign the variable to the new element
-    const newFileElem = document.getElementById('fileElem');
-    newFileElem.addEventListener('change', () => {
-        handleFiles(newFileElem.files);
+    fileElem.addEventListener('change', () => {
+        handleFiles(fileElem.files);
     });
 
     function handleFiles(files) {
@@ -295,32 +299,32 @@ function initializeApp() {
     
     // Handle palette import
     if (importPaletteLink && importPaletteInput) {
-        // First, remove any existing event listeners to prevent duplicates
-        const oldImportPaletteLink = importPaletteLink.cloneNode(true);
-        importPaletteLink.parentNode.replaceChild(oldImportPaletteLink, importPaletteLink);
-        
-        // Reassign the variable to the new element
-        const newImportPaletteLink = document.getElementById('import-palette-link');
-        newImportPaletteLink.addEventListener('click', (e) => {
+        importPaletteLink.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            
+            // Prevent multiple palette file dialogs from opening at once
+            if (paletteDialogOpened) {
+                return;
+            }
+            
+            paletteDialogOpened = true;
             importPaletteInput.click();
-        }, { once: true });
+            
+            // Reset after a short delay
+            setTimeout(() => {
+                paletteDialogOpened = false;
+            }, 1000);
+        });
         
-        // Remove and reattach the change listener to prevent duplicates
-        const oldImportPaletteInput = importPaletteInput.cloneNode(true);
-        importPaletteInput.parentNode.replaceChild(oldImportPaletteInput, importPaletteInput);
-        
-        // Reassign the variable to the new element
-        const newImportPaletteInput = document.getElementById('import-palette-file');
-        newImportPaletteInput.addEventListener('change', () => {
-            if (newImportPaletteInput.files.length > 0) {
-                const file = newImportPaletteInput.files[0];
+        importPaletteInput.addEventListener('change', () => {
+            if (importPaletteInput.files.length > 0) {
+                const file = importPaletteInput.files[0];
                 
                 // Check if file is a text/hex file
                 if (!file.name.endsWith('.hex') && !file.name.endsWith('.txt')) {
                     showError('Please select a valid palette file (.hex or .txt)');
-                    newImportPaletteInput.value = '';
+                    importPaletteInput.value = '';
                     return;
                 }
                 
