@@ -4,7 +4,9 @@ class Config:
     """Base configuration class."""
     DEBUG = False
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///pixel_art.db')
+    
+    # Use SQLite for development
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///pixel_art.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.environ.get('SESSION_SECRET', 'pixel-art-secret-key')
     
