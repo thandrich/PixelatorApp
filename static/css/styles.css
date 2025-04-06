@@ -101,3 +101,89 @@ input[type="file"] {
     max-height: 100px;
     overflow-y: auto;
 }
+
+/* Desktop alignment adjustments */
+@media (min-width: 600px) {
+  /* Keep result container the same height as upload preview */
+  #result-container {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Set a fixed min-height for the about card to match settings height */
+  .md-grid-col-md-6:last-child .md-card:last-child {
+    height: calc(100% - 380px); /* Adjust based on the result card height */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .md-grid-col-md-6:last-child .md-card:last-child .md-card-body {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  /* Make dropzone and result containers have similar padding */
+  #drop-area, #result-container {
+    padding: var(--md-space-3);
+  }
+  
+  /* Ensure preview images and result images have consistent sizing */
+  #preview img, #result-container img {
+    max-width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+  }
+
+  /* Hide the mobile import palette button on desktop */
+  #import-palette-link-mobile {
+    display: none;
+  }
+}
+
+/* Make the color palettes render better */
+.md-palette-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--md-space-1);
+  margin-top: var(--md-space-2);
+  justify-content: flex-start;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--md-shape-corner-small);
+  box-shadow: var(--md-shadow-1);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+}
+
+/* Improved buttons for mobile and desktop */
+@media (min-width: 600px) {
+  .md-button {
+    min-width: 120px;
+  }
+  
+  #import-palette-link {
+    width: 100%;
+  }
+}
+
+/* Card body spacing consistency */
+.md-card-body {
+  padding: var(--md-space-4);
+}
+
+/* Make upload and result containers have similar heights */
+@media (min-width: 600px) {
+  .md-grid-col-md-6:first-child .md-card:first-child .md-card-body,
+  .md-grid-col-md-6:last-child .md-card:first-child .md-card-body {
+    min-height: 240px;
+  }
+}

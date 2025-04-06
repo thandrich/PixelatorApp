@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     // Reset after 2 seconds
                     setTimeout(() => {
-                        importPaletteLink.innerHTML = '<span class="material-symbols-outlined">color_lens</span> Import Additional Palettes';
+                        importPaletteLink.innerHTML = '<span class="material-symbols-outlined">color_lens</span> Import Palette';
                         importPaletteLink.classList.remove('md-button-filled');
                         importPaletteLink.classList.add('md-button-tonal');
                     }, 2000);
