@@ -140,7 +140,6 @@ function setupProcessing() {
             formData.append('max_resolution', document.getElementById('max_resolution').value);
             formData.append('upscale_factor', document.getElementById('upscale_factor').value);
 
-            // Show the loading modal
             loadingModal.show();
 
             fetch('/upload', {
@@ -158,20 +157,12 @@ function setupProcessing() {
                 document.getElementById('result-container').innerHTML = `<img src="${data.processed_image_url}" alt="Processed Image">`;
                 document.getElementById('download-container').style.display = 'block';
                 document.getElementById('download-link').href = data.processed_image_url;
-                
-                // Ensure the loading modal is hidden
-                loadingModal.hide();
             })
             .catch(error => {
-                // Hide the loading modal in case of error
-                loadingModal.hide();
                 showError(error.message);
             })
             .finally(() => {
-                // Make sure the loading modal is always hidden, even if there's an issue with the promises
-                setTimeout(() => {
-                    loadingModal.hide();
-                }, 500);
+                loadingModal.hide();
             });
         });
     }
