@@ -451,12 +451,17 @@ body {
 .md-select-input {
   width: 100%;
   border: none;
-  background: transparent;
+  background: var(--md-surface);
   font-size: 1rem;
   color: var(--md-on-surface);
   padding: var(--md-space-3) 0;
   appearance: none;
   outline: none;
+}
+
+.md-select-input option {
+  background-color: var(--md-surface);
+  color: var(--md-on-surface);
 }
 
 .md-select-label {
