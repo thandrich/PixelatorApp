@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.font-awesome
     pkgs.libGL
     pkgs.glibcLocales
     pkgs.zlib

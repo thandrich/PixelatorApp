@@ -3,15 +3,21 @@
 {% block title %}Error {{ code }} - Pixel Art Generator{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 mx-auto">
-        <div class="card">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0">Error {{ code }}</h5>
+<div class="md-grid">
+    <div class="md-grid-col md-grid-col-12 md-grid-col-md-8 md-grid-col-md-2">
+        <div class="md-card md-shadow-2">
+            <div class="md-card-header" style="background-color: var(--md-error-container); color: var(--md-on-error-container);">
+                <h2 class="md-card-title md-d-flex md-align-center">
+                    <span class="material-symbols-outlined md-mr-2">error</span>
+                    Error {{ code }}
+                </h2>
             </div>
-            <div class="card-body">
-                <p class="lead">{{ error }}</p>
-                <a href="/" class="btn btn-primary">Return to Home</a>
+            <div class="md-card-body md-p-5">
+                <p class="md-text-body-large md-mb-4">{{ error }}</p>
+                <a href="/" class="md-button md-button-filled">
+                    <span class="material-symbols-outlined">home</span>
+                    Return to Home
+                </a>
             </div>
         </div>
     </div>
