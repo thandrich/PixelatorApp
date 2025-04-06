@@ -57,6 +57,18 @@ def cleanup_session(session_id):
                     logging.debug(f"Cleaned up temporary palette: {filepath}")
             except Exception as e:
                 logging.error(f"Error cleaning up temporary palette: {str(e)}")
+        
+        # Clean up temporary palettes in the palette manager        
+        try:
+            from palette_manager import cleanup_session_palettes
+            import config
+            # Get the paths from config for this application
+            app_config = config.get_config()
+            palettes_dir = app_config.UPLOADED_PALETTES_DEST
+            # Clean up the temporary palettes in the palette manager
+            cleanup_session_palettes(session_id, palettes_dir)
+        except Exception as e:
+            logging.error(f"Error cleaning up palette manager: {str(e)}")
                 
         # Remove the session from tracking
         del session_files[session_id]

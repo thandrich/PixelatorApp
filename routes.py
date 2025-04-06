@@ -171,14 +171,24 @@ def register_routes(app):
             
         # Get the colors in the palette
         palette_path = os.path.join(app.config['UPLOADED_PALETTES_DEST'], palette.filename)
-        colors = get_palette_colors(palette_path)
         
-        return jsonify({
-            'id': palette.id,
-            'name': palette.name,
-            'colors': colors,
-            'description': palette.description
-        })
+        # Safe check for palette file existence
+        if not os.path.exists(palette_path):
+            app.logger.error(f"Palette file not found: {palette_path}")
+            return jsonify({'error': 'Palette file not found'}), 404
+        
+        try:
+            colors = get_palette_colors(palette_path)
+            
+            return jsonify({
+                'id': palette.id,
+                'name': palette.name,
+                'colors': colors,
+                'description': palette.description
+            })
+        except Exception as e:
+            app.logger.error(f"Error retrieving palette colors: {str(e)}")
+            return jsonify({'error': 'Error loading palette data'}), 500
     
     @app.route('/palettes')
     def get_palettes():
