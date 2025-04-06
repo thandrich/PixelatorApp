@@ -1,9 +1,8 @@
 import os
-import uuid
 from flask import render_template, request, jsonify, send_from_directory, url_for, redirect, flash
 from werkzeug.utils import secure_filename
 from app import db
-from models import ProcessedImage
+from models import Palette, ProcessedImage
 from image_processor import process_image
 from palette_manager import get_all_palettes, get_palette_by_id, get_palette_colors, add_palette
 from utils import allowed_file, parse_resolution
@@ -78,7 +77,7 @@ def register_routes(app):
             processed_image = ProcessedImage(
                 original_filename=filename,
                 processed_filename=processed_filename,
-                palette_id=int(palette.id),  # Convert string ID to int for DB
+                palette_id=palette.id,
                 quantization_mode=quantization_mode,
                 max_resolution=max_resolution,
                 upscale_factor=upscale_factor
@@ -102,7 +101,7 @@ def register_routes(app):
         """Download a processed image."""
         return send_from_directory(app.config['PROCESSED_IMAGES_DEST'], filename)
     
-    @app.route('/palette/<palette_id>')
+    @app.route('/palette/<int:palette_id>')
     def get_palette(palette_id):
         """Get information about a specific palette."""
         palette = get_palette_by_id(palette_id)
@@ -147,12 +146,12 @@ def register_routes(app):
         name = request.form.get('name', file.filename.rsplit('.', 1)[0])
         description = request.form.get('description', f"Custom palette: {name}")
         
-        # Add the palette to the in-memory storage (marked as temporary)
+        # Add the palette to the database
         palette = add_palette(
             name=name,
             palette_file=file,
             description=description,
-            is_temp=True,  # This marks it as a user-uploaded temp palette
+            is_default=False,
             palettes_dir=app.config['UPLOADED_PALETTES_DEST']
         )
         

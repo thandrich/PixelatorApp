@@ -1,74 +1,16 @@
 import os
-import uuid
 import shutil
+from models import Palette, db
 from werkzeug.utils import secure_filename
-
-# In-memory storage for palettes
-_palettes = []
-
-class InMemoryPalette:
-    """An in-memory representation of a palette."""
-    def __init__(self, id, name, filename, description="", is_temp=False):
-        self.id = id
-        self.name = name
-        self.filename = filename
-        self.description = description
-        self.is_temp = is_temp  # True for user-uploaded palettes in session
-
-    def to_dict(self):
-        """Convert the palette to a dictionary for JSON serialization."""
-        return {
-            'id': self.id,
-            'name': self.name,
-            'filename': self.filename,
-            'description': self.description,
-            'is_temp': self.is_temp
-        }
-
-def load_palettes_from_folder(palettes_dir):
-    """
-    Load all palettes from the palettes folder.
-    This should be called on application startup.
-    """
-    global _palettes
-    _palettes = []  # Clear the palettes
-    
-    try:
-        # Get all .hex files in the palettes directory
-        palette_files = []
-        
-        for filename in os.listdir(palettes_dir):
-            if filename.endswith('.hex'):
-                # Create a more readable name from the filename
-                name = os.path.splitext(filename)[0]
-                name = name.replace('-', ' ').title()
-                name = name.replace('_', ' ')
-                
-                # Add the palette to the list
-                palette_id = str(len(_palettes) + 1)  # Simple ID scheme
-                palette = InMemoryPalette(
-                    id=palette_id,
-                    name=name,
-                    filename=filename,
-                    description=f"{name} palette",
-                    is_temp=False
-                )
-                _palettes.append(palette)
-        
-        print(f"Successfully loaded {len(_palettes)} palettes from {palettes_dir}")
-        return len(_palettes)
-    except Exception as e:
-        print(f"Error loading palettes from folder: {str(e)}")
-        return 0
 
 def get_all_palettes():
     """
-    Retrieve all palettes.
+    Retrieve all palettes from the database.
 
     Returns:
-        A list of InMemoryPalette objects.
+        A list of Palette objects.
     """
-    return _palettes
+    return Palette.query.order_by(Palette.name).all()
 
 def get_palette_by_id(palette_id):
     """
@@ -78,12 +20,9 @@ def get_palette_by_id(palette_id):
         palette_id: The ID of the palette to retrieve.
 
     Returns:
-        An InMemoryPalette object or None if not found.
+        A Palette object or None if not found.
     """
-    for palette in _palettes:
-        if str(palette.id) == str(palette_id):
-            return palette
-    return None
+    return Palette.query.get(palette_id)
 
 def get_palette_colors(palette_path):
     """
@@ -99,47 +38,113 @@ def get_palette_colors(palette_path):
         colors = [line.strip() for line in f if line.strip()]
     return colors
 
-def add_palette(name, palette_file, description="", is_temp=True, palettes_dir=None):
+def add_palette(name, palette_file, description="", is_default=False, palettes_dir=None):
     """
-    Add a new palette to the in-memory storage and save the palette file.
+    Add a new palette to the database and save the palette file.
 
     Args:
         name: The name of the palette.
         palette_file: The uploaded palette file object.
         description: An optional description of the palette.
-        is_temp: Whether this palette is temporary (user-uploaded).
+        is_default: Whether this palette should be set as the default.
         palettes_dir: The directory where palette files should be saved.
 
     Returns:
-        The newly created InMemoryPalette object, or None if the operation failed.
+        The newly created Palette object, or None if the operation failed.
     """
     try:
-        # Create a unique filename to avoid conflicts
-        original_filename = secure_filename(palette_file.filename)
-        base, ext = os.path.splitext(original_filename)
-        unique_filename = f"{base}_{uuid.uuid4().hex[:8]}{ext}"
-        
-        # Generate a unique ID
-        palette_id = str(len(_palettes) + 1)
-        
+        # Secure the filename
+        filename = secure_filename(palette_file.filename)
+
         # Create a new palette record
-        palette = InMemoryPalette(
-            id=palette_id,
+        palette = Palette(
             name=name,
-            filename=unique_filename,
+            filename=filename,
             description=description,
-            is_temp=is_temp
+            is_default=is_default
         )
-        
-        # Add the palette to the in-memory storage
-        _palettes.append(palette)
-        
+
+        # Add the palette to the database
+        db.session.add(palette)
+        db.session.commit()
+
         # Save the palette file
         if palettes_dir:
-            filepath = os.path.join(palettes_dir, unique_filename)
-            palette_file.save(filepath)
-        
+            palette_file.save(os.path.join(palettes_dir, filename))
+
         return palette
     except Exception as e:
+        db.session.rollback()
         print(f"Error adding palette: {str(e)}")
         return None
+
+def delete_palette(palette_id, palettes_dir=None):
+    """
+    Delete a palette from the database and remove the palette file.
+
+    Args:
+        palette_id: The ID of the palette to delete.
+        palettes_dir: The directory where palette files are stored.
+
+    Returns:
+        True if the operation succeeded, False otherwise.
+    """
+    try:
+        palette = get_palette_by_id(palette_id)
+        if not palette:
+            return False
+
+        # Remove the palette file
+        if palettes_dir and os.path.exists(os.path.join(palettes_dir, palette.filename)):
+            os.remove(os.path.join(palettes_dir, palette.filename))
+
+        # Remove the palette from the database
+        db.session.delete(palette)
+        db.session.commit()
+
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting palette: {str(e)}")
+        return False
+
+def import_default_palettes(palette_files, palettes_dir):
+    """
+    Import default palettes into the database.
+
+    Args:
+        palette_files: A list of (name, path) tuples for default palettes.
+        palettes_dir: The directory where palette files should be saved.
+
+    Returns:
+        The number of palettes successfully imported.
+    """
+    count = 0
+
+    for name, path in palette_files:
+        filename = os.path.basename(path)
+
+        try:
+            # Create a new palette record
+            palette = Palette(
+                name=name,
+                filename=filename,
+                description=f"Default {name} palette",
+                is_default=True  # All palettes from files are marked as default
+            )
+
+            # Add the palette to the database
+            db.session.add(palette)
+            count += 1
+        except Exception as e:
+            print(f"Error importing palette {name}: {str(e)}")
+            continue
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        print(f"Error committing palettes to database: {str(e)}")
+        db.session.rollback()
+        return 0
+
+    return count

@@ -47,7 +47,3 @@ with app.app_context():
     # Import and register routes
     from routes import register_routes
     register_routes(app)
-    
-    # Load palettes from the palettes directory into memory
-    from import_palettes import main as import_palettes
-    import_palettes()

@@ -219,8 +219,9 @@
 {% block extra_js %}
 <script>
     // Pass server-side data to JavaScript
-    window.serverData = {
+    const serverData = {
         quantizationModes: {{ quantization_modes|tojson }}
     };
 </script>
+<script src="/static/js/main.js"></script>
 {% endblock %}
