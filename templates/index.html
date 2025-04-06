@@ -144,8 +144,8 @@
     </div>
 </div>
 
-<!-- Loading spinner modal with added close button -->
-<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+<!-- Loading spinner modal -->
+<div class="modal" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-body text-center py-4">
@@ -156,14 +156,14 @@
                 <p class="mb-0 text-muted">This may take a few moments depending on the image size and settings.</p>
             </div>
             <div class="modal-footer" style="justify-content: center;">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelProcessingBtn">Cancel</button>
+                <button type="button" class="btn btn-secondary" id="cancelProcessingBtn">Cancel</button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Error modal -->
-<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+<div class="modal" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -215,6 +215,72 @@
     .spinner-border {
         width: 3rem;
         height: 3rem;
+    }
+    
+    /* Custom Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1055;
+        width: 100%;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        outline: 0;
+    }
+    
+    .modal.show {
+        display: block;
+    }
+    
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1050;
+        width: 100vw;
+        height: 100vh;
+        background-color: #000;
+        opacity: 0.5;
+    }
+    
+    .modal-dialog {
+        position: relative;
+        width: auto;
+        margin: 0.5rem;
+        pointer-events: none;
+    }
+    
+    .modal-dialog-centered {
+        display: flex;
+        align-items: center;
+        min-height: calc(100% - 1rem);
+    }
+    
+    .modal-content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        pointer-events: auto;
+        background-color: var(--bs-body-bg);
+        background-clip: padding-box;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        border-radius: 0.5rem;
+        outline: 0;
+    }
+    
+    @media (min-width: 576px) {
+        .modal-dialog {
+            max-width: 500px;
+            margin: 1.75rem auto;
+        }
+        
+        .modal-dialog-centered {
+            min-height: calc(100% - 3.5rem);
+        }
     }
 </style>
 {% endblock %}

@@ -1,6 +1,7 @@
 // Global variables
 let paletteDialogOpened = false;
 let lastValidImageFile = null;
+let isProcessing = false; // New flag to track processing state
 
 // DOM Elements
 const fileElem = document.getElementById('fileElem');
@@ -15,7 +16,6 @@ const importPaletteLink = document.getElementById('import-palette-link');
 const importPaletteInput = document.getElementById('import-palette-file');
 const fileSelect = document.getElementById('fileSelect');
 const loadingModalElement = document.getElementById('loadingModal');
-const loadingModal = new bootstrap.Modal(loadingModalElement);
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,7 +28,59 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFileHandling();
     setupPaletteHandling();
     setupProcessing();
+    
+    // Set up the cancel processing button
+    const cancelButton = document.getElementById('cancelProcessingBtn');
+    if (cancelButton) {
+        cancelButton.addEventListener('click', () => {
+            hideLoadingModal();
+        });
+    }
 });
+
+// Custom modal functions instead of using Bootstrap API
+function showLoadingModal() {
+    if (loadingModalElement) {
+        // Add necessary classes for the modal to display
+        loadingModalElement.classList.add('show');
+        loadingModalElement.style.display = 'block';
+        
+        // Add backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+        
+        // Set body to modal-open to prevent scrolling
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+        document.body.style.paddingRight = '15px';
+        
+        isProcessing = true;
+        console.log('Loading modal shown manually');
+    }
+}
+
+function hideLoadingModal() {
+    if (loadingModalElement) {
+        // Remove classes
+        loadingModalElement.classList.remove('show');
+        loadingModalElement.style.display = 'none';
+        
+        // Remove backdrop
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+        
+        // Restore body
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        isProcessing = false;
+        console.log('Loading modal hidden manually');
+    }
+}
 
 function setupFileHandling() {
     if (fileSelect && fileElem) {
@@ -132,6 +184,11 @@ function setupProcessing() {
                 showError('Please select an image first.');
                 return;
             }
+            
+            if (isProcessing) {
+                console.log('Already processing, ignoring click');
+                return;
+            }
 
             const formData = new FormData();
             formData.append('file', lastValidImageFile);
@@ -145,9 +202,8 @@ function setupProcessing() {
             formData.append('max_resolution', document.getElementById('max_resolution').value);
             formData.append('upscale_factor', document.getElementById('upscale_factor').value);
 
-            // Show the loading modal
-            loadingModal.show();
-            console.log('Loading modal shown, processing started');
+            // Show the loading modal (custom implementation)
+            showLoadingModal();
 
             fetch('/upload', {
                 method: 'POST',
@@ -171,43 +227,10 @@ function setupProcessing() {
                 // Log the quantization mode from response
                 console.log(`Response quantization mode: ${data.quantization_mode}`);
                 
-                // Forcefully try to close the loading modal
-                if (loadingModalElement) {
-                    console.log(`Attempting to hide loading modal for mode: ${data.quantization_mode}`);
-                    
-                    // Check if the modal is visible
-                    if (loadingModalElement.classList.contains('show')) {
-                        console.log('Modal is showing, attempting to hide...');
-                        
-                        // Try multiple approaches to hide the modal
-                        try {
-                            loadingModal.hide();
-                            console.log('Modal hidden using Bootstrap API');
-                        } catch (e) {
-                            console.error('Error hiding modal with Bootstrap API:', e);
-                            
-                            // Try alternative approach
-                            try {
-                                // Remove the modal backdrop
-                                const backdrop = document.querySelector('.modal-backdrop');
-                                if (backdrop) {
-                                    backdrop.remove();
-                                    console.log('Modal backdrop removed');
-                                }
-                                
-                                // Remove show class and inline style
-                                loadingModalElement.classList.remove('show');
-                                loadingModalElement.style.display = 'none';
-                                document.body.classList.remove('modal-open');
-                                console.log('Modal hidden using direct DOM manipulation');
-                            } catch (e2) {
-                                console.error('Error hiding modal with DOM manipulation:', e2);
-                            }
-                        }
-                    } else {
-                        console.log('Modal is not showing, no need to hide');
-                    }
-                }
+                // Hide the loading modal (custom implementation)
+                setTimeout(() => {
+                    hideLoadingModal();
+                }, 250); // Small delay to ensure everything is ready
             })
             .catch(error => {
                 console.error('Error processing image:', error);
@@ -215,29 +238,9 @@ function setupProcessing() {
             })
             .finally(() => {
                 console.log('Processing finished, ensuring modal is hidden');
-                
-                // Final attempt to hide the modal
-                if (loadingModalElement) {
-                    try {
-                        loadingModal.hide();
-                        console.log('Modal hidden in finally block');
-                    } catch (e) {
-                        console.error('Error hiding modal in finally block:', e);
-                        
-                        // Alternative approach in finally block
-                        try {
-                            const backdrop = document.querySelector('.modal-backdrop');
-                            if (backdrop) backdrop.remove();
-                            
-                            loadingModalElement.classList.remove('show');
-                            loadingModalElement.style.display = 'none';
-                            document.body.classList.remove('modal-open');
-                            console.log('Modal forcefully hidden in finally block');
-                        } catch (e2) {
-                            console.error('Final attempt to hide modal failed:', e2);
-                        }
-                    }
-                }
+                setTimeout(() => {
+                    hideLoadingModal();
+                }, 500); // Longer delay in finally as a backup
             });
         });
     }
@@ -291,9 +294,44 @@ function loadPaletteSwatches(paletteId) {
 }
 
 function showError(message) {
-    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-    document.getElementById('error-message').textContent = message;
-    errorModal.show();
+    // We'll also create a custom modal for errors to avoid Bootstrap issues
+    const errorModalElement = document.getElementById('errorModal');
+    
+    if (errorModalElement) {
+        // Set the error message
+        document.getElementById('error-message').textContent = message;
+        
+        // Show the modal
+        errorModalElement.classList.add('show');
+        errorModalElement.style.display = 'block';
+        
+        // Add backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+        
+        // Set body to modal-open
+        document.body.classList.add('modal-open');
+        
+        // Set up the close button
+        const closeButtons = errorModalElement.querySelectorAll('[data-bs-dismiss="modal"]');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Hide the modal
+                errorModalElement.classList.remove('show');
+                errorModalElement.style.display = 'none';
+                
+                // Remove backdrop
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                
+                // Restore body
+                document.body.classList.remove('modal-open');
+            });
+        });
+    }
 }
 
 function clearFileInput() {
