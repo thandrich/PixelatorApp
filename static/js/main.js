@@ -3,15 +3,19 @@ let paletteDialogOpened = false;
 let lastValidImageFile = null;
 
 // DOM Elements
-const fileElem = document.getElementById('file-input');
-const dropZone = document.getElementById('drop-zone');
+const fileElem = document.getElementById('fileElem');
+const dropZone = document.getElementById('drop-area');
 const preview = document.getElementById('preview');
 const processButton = document.getElementById('process-button');
-const paletteSelect = document.getElementById('palette-select');
+const paletteSelect = document.getElementById('palette');
+const quantizationSelect = document.getElementById('quantization_mode');
+const quantizationDescription = document.getElementById('quantization_description');
 const palettePreview = document.getElementById('palette-preview');
 const importPaletteLink = document.getElementById('import-palette-link');
 const importPaletteInput = document.getElementById('import-palette-file');
-const loadingModal = new bootstrap.Modal(document.getElementById('loading-modal'));
+const fileSelect = document.getElementById('fileSelect');
+const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal')); //Corrected selector
+
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,6 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupFileHandling() {
+    if (fileSelect && fileElem) {
+        fileSelect.addEventListener('click', () => {
+            fileElem.click();
+        });
+    }
+
     if (fileElem && dropZone) {
         // File input change handler
         fileElem.addEventListener('change', (e) => {
@@ -37,19 +47,19 @@ function setupFileHandling() {
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            dropZone.classList.add('drag-over');
+            dropZone.classList.add('highlight');
         });
 
         dropZone.addEventListener('dragleave', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            dropZone.classList.remove('drag-over');
+            dropZone.classList.remove('highlight');
         });
 
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            dropZone.classList.remove('drag-over');
+            dropZone.classList.remove('highlight');
             handleFiles(e.dataTransfer.files);
         });
     }
@@ -74,41 +84,43 @@ function setupPaletteHandling() {
             }
         });
 
-        importPaletteInput.addEventListener('change', () => {
-            if (importPaletteInput.files.length > 0) {
-                const file = importPaletteInput.files[0];
-                if (!file.name.endsWith('.hex') && !file.name.endsWith('.txt')) {
-                    showError('Please select a valid palette file (.hex or .txt)');
-                    importPaletteInput.value = '';
-                    return;
-                }
+        importPaletteInput.addEventListener('change', handlePaletteImport);
+    }
+}
 
-                const formData = new FormData();
-                formData.append('palette_file', file);
-                formData.append('name', file.name.replace(/\.[^/.]+$/, ''));
+function handlePaletteImport() {
+    if (importPaletteInput.files.length > 0) {
+        const file = importPaletteInput.files[0];
+        if (!file.name.endsWith('.hex') && !file.name.endsWith('.txt')) {
+            showError('Please select a valid palette file (.hex or .txt)');
+            importPaletteInput.value = '';
+            return;
+        }
 
-                fetch('/palette/import', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) throw new Error(data.error);
-                    const option = document.createElement('option');
-                    option.value = data.id;
-                    option.text = data.name;
-                    paletteSelect.add(option);
-                    paletteSelect.value = data.id;
-                    loadPaletteSwatches(data.id);
-                    alert(`Palette "${data.name}" imported successfully!`);
-                })
-                .catch(error => {
-                    showError(error.message);
-                })
-                .finally(() => {
-                    importPaletteInput.value = '';
-                });
-            }
+        const formData = new FormData();
+        formData.append('palette_file', file);
+        formData.append('name', file.name.replace(/\.[^/.]+$/, ''));
+
+        fetch('/palette/import', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+            const option = document.createElement('option');
+            option.value = data.id;
+            option.text = data.name;
+            paletteSelect.add(option);
+            paletteSelect.value = data.id;
+            loadPaletteSwatches(data.id);
+            alert(`Palette "${data.name}" imported successfully!`);
+        })
+        .catch(error => {
+            showError(error.message);
+        })
+        .finally(() => {
+            importPaletteInput.value = '';
         });
     }
 }
@@ -124,7 +136,7 @@ function setupProcessing() {
             const formData = new FormData();
             formData.append('file', lastValidImageFile);
             formData.append('palette', paletteSelect.value);
-            formData.append('quantization_mode', document.getElementById('quantization-mode').value);
+            formData.append('quantization_mode', quantizationSelect.value);
             formData.append('max_resolution', document.getElementById('max-resolution').value);
             formData.append('upscale_factor', document.getElementById('upscale-factor').value);
 
@@ -137,7 +149,9 @@ function setupProcessing() {
             .then(response => response.json())
             .then(data => {
                 if (data.error) throw new Error(data.error);
-                window.location.href = data.processed_image_url;
+                document.getElementById('result-container').innerHTML = `<img src="${data.processed_image_url}" alt="Processed Image">`;
+                document.getElementById('download-container').style.display = 'block';
+                document.getElementById('download-link').href = data.processed_image_url;
             })
             .catch(error => {
                 showError(error.message);
@@ -197,7 +211,9 @@ function loadPaletteSwatches(paletteId) {
 }
 
 function showError(message) {
-    alert(message);
+    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+    document.getElementById('error-message').textContent = message;
+    errorModal.show();
 }
 
 function clearFileInput() {
@@ -209,47 +225,18 @@ function clearFileInput() {
 
 //This part is kept from the original code because it's not directly addressed in the edited snippet and is still relevant
 // Update quantization description when mode is changed
-    if (quantizationSelect && quantizationDescription) {
-        quantizationSelect.addEventListener('change', () => {
-            const selectedOption = quantizationSelect.options[quantizationSelect.selectedIndex];
-            // Check if serverData exists first
-            if (window.serverData && window.serverData.quantizationModes) {
-                const selectedMode = window.serverData.quantizationModes.find(mode => mode.value === selectedOption.value);
-                if (selectedMode) {
-                    quantizationDescription.textContent = selectedMode.description;
-                }
-            } else {
-                // Fallback to hardcoded descriptions if serverData is not available
-                switch(selectedOption.value) {
-                    case 'contrast':
-                        quantizationDescription.textContent = 'Emphasizes edges while quantizing';
-                        break;
-                    case 'natural':
-                        quantizationDescription.textContent = 'Attempts a more natural color reduction using CIELAB color space';
-                        break;
-                    case 'kmeans':
-                        quantizationDescription.textContent = 'Uses k-means clustering to find dominant colors and match to palette';
-                        break;
-                    case 'kmeans_brightness':
-                        quantizationDescription.textContent = 'Uses k-means and maps clusters based on brightness';
-                        break;
-                    default:
-                        quantizationDescription.textContent = '';
-                }
-            }
-        });
-        
-        // Set initial quantization description
-        const initialOption = quantizationSelect.options[quantizationSelect.selectedIndex];
+if (quantizationSelect && quantizationDescription) {
+    quantizationSelect.addEventListener('change', () => {
+        const selectedOption = quantizationSelect.options[quantizationSelect.selectedIndex];
         // Check if serverData exists first
         if (window.serverData && window.serverData.quantizationModes) {
-            const initialMode = window.serverData.quantizationModes.find(mode => mode.value === initialOption.value);
-            if (initialMode) {
-                quantizationDescription.textContent = initialMode.description;
+            const selectedMode = window.serverData.quantizationModes.find(mode => mode.value === selectedOption.value);
+            if (selectedMode) {
+                quantizationDescription.textContent = selectedMode.description;
             }
         } else {
             // Fallback to hardcoded descriptions if serverData is not available
-            switch(initialOption.value) {
+            switch(selectedOption.value) {
                 case 'contrast':
                     quantizationDescription.textContent = 'Emphasizes edges while quantizing';
                     break;
@@ -266,4 +253,33 @@ function clearFileInput() {
                     quantizationDescription.textContent = '';
             }
         }
+    });
+
+    // Set initial quantization description
+    const initialOption = quantizationSelect.options[quantizationSelect.selectedIndex];
+    // Check if serverData exists first
+    if (window.serverData && window.serverData.quantizationModes) {
+        const initialMode = window.serverData.quantizationModes.find(mode => mode.value === initialOption.value);
+        if (initialMode) {
+            quantizationDescription.textContent = initialMode.description;
+        }
+    } else {
+        // Fallback to hardcoded descriptions if serverData is not available
+        switch(initialOption.value) {
+            case 'contrast':
+                quantizationDescription.textContent = 'Emphasizes edges while quantizing';
+                break;
+            case 'natural':
+                quantizationDescription.textContent = 'Attempts a more natural color reduction using CIELAB color space';
+                break;
+            case 'kmeans':
+                quantizationDescription.textContent = 'Uses k-means clustering to find dominant colors and match to palette';
+                break;
+            case 'kmeans_brightness':
+                quantizationDescription.textContent = 'Uses k-means and maps clusters based on brightness';
+                break;
+            default:
+                quantizationDescription.textContent = '';
+        }
     }
+}
