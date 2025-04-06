@@ -155,13 +155,12 @@ function setupProcessing() {
             .then(data => {
                 if (data.error) throw new Error(data.error);
                 document.getElementById('result-container').innerHTML = `<img src="${data.processed_image_url}" alt="Processed Image">`;
+                loadingModal.hide();
                 document.getElementById('download-container').style.display = 'block';
                 document.getElementById('download-link').href = data.processed_image_url;
             })
             .catch(error => {
                 showError(error.message);
-            })
-            .finally(() => {
                 loadingModal.hide();
             });
         });
