@@ -116,8 +116,25 @@ def register_routes(app):
     
     @app.route('/download/<filename>')
     def download_file(filename):
-        """Download a processed image."""
-        return send_from_directory(app.config['PROCESSED_IMAGES_DEST'], filename)
+        """Download a processed image with formatted filename."""
+        # Get the processed image record from database
+        processed_image = ProcessedImage.query.filter_by(processed_filename=filename).first()
+        if not processed_image:
+            return jsonify({'error': 'File not found'}), 404
+            
+        # Get original filename without extension
+        original_name = os.path.splitext(processed_image.original_filename)[0]
+        # Get palette name from relationship
+        palette_name = processed_image.palette.name.lower().replace(' ', '-')
+        # Format the download filename
+        download_filename = f"{original_name}_{palette_name}_{processed_image.quantization_mode}.png"
+        
+        return send_from_directory(
+            app.config['PROCESSED_IMAGES_DEST'], 
+            filename,
+            as_attachment=True,
+            download_name=download_filename
+        )
     
     @app.route('/palette/<palette_id>')
     def get_palette(palette_id):
