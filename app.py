@@ -47,3 +47,7 @@ with app.app_context():
     # Import and register routes
     from routes import register_routes
     register_routes(app)
+    
+    # Import default palettes into the database
+    from import_palettes import main as import_palettes
+    import_palettes()
