@@ -137,8 +137,8 @@ function setupProcessing() {
             formData.append('file', lastValidImageFile);
             formData.append('palette', paletteSelect.value);
             formData.append('quantization_mode', quantizationSelect.value);
-            formData.append('max_resolution', document.getElementById('max-resolution').value);
-            formData.append('upscale_factor', document.getElementById('upscale-factor').value);
+            formData.append('max_resolution', document.getElementById('max_resolution').value);
+            formData.append('upscale_factor', document.getElementById('upscale_factor').value);
 
             loadingModal.show();
 
@@ -146,7 +146,12 @@ function setupProcessing() {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.error) throw new Error(data.error);
                 document.getElementById('result-container').innerHTML = `<img src="${data.processed_image_url}" alt="Processed Image">`;
