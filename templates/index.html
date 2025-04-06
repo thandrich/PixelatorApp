@@ -18,8 +18,31 @@
 </div>
 
 <div class="md-grid">
-    <!-- LEFT COLUMN FOR DESKTOP - Settings column -->
-    <div class="md-grid-col md-grid-col-12 md-grid-col-md-6 md-order-1">
+    <!-- Result Card (On top for mobile) -->
+    <div class="md-grid-col md-grid-col-12 md-grid-col-md-8 md-order-2 md-order-md-1">
+        <div class="md-card md-shadow-1 md-mb-4">
+            <div class="md-card-header">
+                <h2 class="md-card-title md-d-flex md-align-center">
+                    <span class="material-symbols-outlined md-mr-2">palette</span>
+                    Result
+                </h2>
+            </div>
+            <div class="md-card-body">
+                <div id="result-container" class="md-text-center">
+                    <p class="md-text-body-medium md-text-secondary">Processed image will appear here</p>
+                </div>
+                <div id="download-container" class="md-text-center md-mt-4" style="display: none;">
+                    <a id="download-link" class="md-button md-button-filled" download>
+                        <span class="material-symbols-outlined">download</span>
+                        Download Image
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Left Column - Upload and Settings (First for mobile) -->
+    <div class="md-grid-col md-grid-col-12 md-grid-col-md-4 md-order-1 md-order-md-2">
         <!-- Upload Card -->
         <div class="md-card md-shadow-1 md-mb-4">
             <div class="md-card-header">
@@ -131,32 +154,10 @@
             </div>
         </div>
     </div>
-    
-    <!-- RIGHT COLUMN FOR DESKTOP - Result and About -->
-    <div class="md-grid-col md-grid-col-12 md-grid-col-md-6 md-order-2">
-        <!-- Result Card (On top for mobile) -->
-        <div class="md-card md-shadow-1 md-mb-4 md-order-md-1 md-order-first">
-            <div class="md-card-header">
-                <h2 class="md-card-title md-d-flex md-align-center">
-                    <span class="material-symbols-outlined md-mr-2">palette</span>
-                    Result
-                </h2>
-            </div>
-            <div class="md-card-body">
-                <div id="result-container" class="md-text-center">
-                    <p class="md-text-body-medium md-text-secondary">Processed image will appear here</p>
-                </div>
-                <div id="download-container" class="md-text-center md-mt-4" style="display: none;">
-                    <a id="download-link" class="md-button md-button-filled" download>
-                        <span class="material-symbols-outlined">download</span>
-                        Download Image
-                    </a>
-                </div>
-            </div>
-        </div>
 
-        <!-- About Card -->
-        <div class="md-card md-shadow-1 md-mb-4 md-order-md-2 md-order-last">
+    <!-- About Card -->
+    <div class="md-grid-col md-grid-col-12 md-order-3">
+        <div class="md-card md-shadow-1">
             <div class="md-card-header">
                 <h2 class="md-card-title md-d-flex md-align-center">
                     <span class="material-symbols-outlined md-mr-2">info</span>
