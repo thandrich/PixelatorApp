@@ -44,6 +44,10 @@ with app.app_context():
     import models
     db.create_all()
     
+    # Import default palettes
+    from import_palettes import main as import_palettes
+    import_palettes()
+    
     # Import and register routes
     from routes import register_routes
     register_routes(app)

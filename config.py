@@ -6,7 +6,7 @@ class Config:
     TESTING = False
     
     # Use SQLite for development
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///pixel_art.db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///pixel_art.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.environ.get('SESSION_SECRET', 'pixel-art-secret-key')
     
@@ -53,8 +53,8 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     """Production configuration."""
-    # Production-specific settings go here
-    pass
+    # Use PostgreSQL for production
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
 
 # Configuration dictionary
 config = {
