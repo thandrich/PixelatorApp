@@ -136,40 +136,107 @@ function setupProcessing() {
             const formData = new FormData();
             formData.append('file', lastValidImageFile);
             formData.append('palette', paletteSelect.value);
-            formData.append('quantization_mode', quantizationSelect.value);
+            
+            // Get and log the quantization mode
+            const selectedMode = quantizationSelect.value;
+            console.log(`Selected quantization mode: ${selectedMode}`);
+            formData.append('quantization_mode', selectedMode);
+            
             formData.append('max_resolution', document.getElementById('max_resolution').value);
             formData.append('upscale_factor', document.getElementById('upscale_factor').value);
 
+            // Show the loading modal
             loadingModal.show();
+            console.log('Loading modal shown, processing started');
 
             fetch('/upload', {
                 method: 'POST',
                 body: formData
             })
             .then(response => {
+                console.log(`Received response status: ${response.status}`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then(data => {
+                console.log(`Received data: ${JSON.stringify(data)}`);
                 if (data.error) throw new Error(data.error);
+                
                 document.getElementById('result-container').innerHTML = `<img src="${data.processed_image_url}" alt="Processed Image">`;
                 document.getElementById('download-container').style.display = 'block';
                 document.getElementById('download-link').href = data.processed_image_url;
                 
-                // Make sure the loading modal is hidden
-                if (loadingModalElement && loadingModalElement.classList.contains('show')) {
-                    loadingModal.hide();
+                // Log the quantization mode from response
+                console.log(`Response quantization mode: ${data.quantization_mode}`);
+                
+                // Forcefully try to close the loading modal
+                if (loadingModalElement) {
+                    console.log(`Attempting to hide loading modal for mode: ${data.quantization_mode}`);
+                    
+                    // Check if the modal is visible
+                    if (loadingModalElement.classList.contains('show')) {
+                        console.log('Modal is showing, attempting to hide...');
+                        
+                        // Try multiple approaches to hide the modal
+                        try {
+                            loadingModal.hide();
+                            console.log('Modal hidden using Bootstrap API');
+                        } catch (e) {
+                            console.error('Error hiding modal with Bootstrap API:', e);
+                            
+                            // Try alternative approach
+                            try {
+                                // Remove the modal backdrop
+                                const backdrop = document.querySelector('.modal-backdrop');
+                                if (backdrop) {
+                                    backdrop.remove();
+                                    console.log('Modal backdrop removed');
+                                }
+                                
+                                // Remove show class and inline style
+                                loadingModalElement.classList.remove('show');
+                                loadingModalElement.style.display = 'none';
+                                document.body.classList.remove('modal-open');
+                                console.log('Modal hidden using direct DOM manipulation');
+                            } catch (e2) {
+                                console.error('Error hiding modal with DOM manipulation:', e2);
+                            }
+                        }
+                    } else {
+                        console.log('Modal is not showing, no need to hide');
+                    }
                 }
             })
             .catch(error => {
+                console.error('Error processing image:', error);
                 showError(error.message);
             })
             .finally(() => {
-                // Ensure the loading modal is hidden in all cases
-                if (loadingModalElement && loadingModalElement.classList.contains('show')) {
-                    loadingModal.hide();
+                console.log('Processing finished, ensuring modal is hidden');
+                
+                // Final attempt to hide the modal
+                if (loadingModalElement) {
+                    try {
+                        loadingModal.hide();
+                        console.log('Modal hidden in finally block');
+                    } catch (e) {
+                        console.error('Error hiding modal in finally block:', e);
+                        
+                        // Alternative approach in finally block
+                        try {
+                            const backdrop = document.querySelector('.modal-backdrop');
+                            if (backdrop) backdrop.remove();
+                            
+                            loadingModalElement.classList.remove('show');
+                            loadingModalElement.style.display = 'none';
+                            document.body.classList.remove('modal-open');
+                            console.log('Modal forcefully hidden in finally block');
+                        } catch (e2) {
+                            console.error('Final attempt to hide modal failed:', e2);
+                        }
+                    }
                 }
             });
         });

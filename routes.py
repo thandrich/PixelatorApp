@@ -52,6 +52,9 @@ def register_routes(app):
         max_resolution = request.form.get('max_resolution', '512,512')
         upscale_factor = int(request.form.get('upscale_factor', app.config['DEFAULT_UPSCALE_FACTOR']))
         
+        # Debug log for the selected quantization mode
+        app.logger.debug(f"Processing with quantization mode: {quantization_mode}")
+        
         # Get the palette
         palette = get_palette_by_id(palette_id)
         if not palette:
@@ -65,6 +68,10 @@ def register_routes(app):
         try:
             # Process the image
             palette_path = os.path.join(app.config['UPLOADED_PALETTES_DEST'], palette.filename)
+            
+            # Debug log for processing start
+            app.logger.debug(f"Starting image processing with mode: {quantization_mode}")
+            
             processed_filename = process_image(
                 filepath,
                 palette_path,
@@ -73,6 +80,9 @@ def register_routes(app):
                 quantization_mode,
                 upscale_factor
             )
+            
+            # Debug log for processing completion
+            app.logger.debug(f"Completed image processing with mode: {quantization_mode}")
             
             # Save the processed image record
             processed_image = ProcessedImage(
@@ -86,15 +96,22 @@ def register_routes(app):
             db.session.add(processed_image)
             db.session.commit()
             
+            # Debug log for database update
+            app.logger.debug(f"Saved processed image record with mode: {quantization_mode}")
+            
             # Return the processed image details
-            return jsonify({
+            result = {
                 'success': True,
                 'processed_image_id': processed_image.id,
                 'processed_image_url': url_for('download_file', filename=processed_filename),
-                'palette_name': palette.name
-            })
+                'palette_name': palette.name,
+                'quantization_mode': quantization_mode  # Add this to help debug
+            }
+            
+            app.logger.debug(f"Returning result for mode: {quantization_mode}, data: {result}")
+            return jsonify(result)
         except Exception as e:
-            app.logger.error(f"Error processing image: {str(e)}")
+            app.logger.error(f"Error processing image with mode {quantization_mode}: {str(e)}")
             return jsonify({'error': str(e)}), 500
     
     @app.route('/download/<filename>')

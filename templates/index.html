@@ -144,8 +144,8 @@
     </div>
 </div>
 
-<!-- Loading spinner modal -->
-<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static">
+<!-- Loading spinner modal with added close button -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-body text-center py-4">
@@ -154,6 +154,9 @@
                 </div>
                 <h5 id="loadingModalLabel">Processing your image...</h5>
                 <p class="mb-0 text-muted">This may take a few moments depending on the image size and settings.</p>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelProcessingBtn">Cancel</button>
             </div>
         </div>
     </div>
