@@ -104,6 +104,9 @@ def load_palettes_from_folder(palettes_dir):
                 )
                 _palettes.append(palette)
         
+        # Sort palettes by name
+        _palettes.sort(key=lambda x: x.name.lower())
+        
         print(f"Successfully loaded {len(_palettes)} palettes from {palettes_dir}")
         return len(_palettes)
     except Exception as e:
