@@ -157,11 +157,10 @@ function setupProcessing() {
                 document.getElementById('result-container').innerHTML = `<img src="${data.processed_image_url}" alt="Processed Image">`;
                 document.getElementById('download-container').style.display = 'block';
                 document.getElementById('download-link').href = data.processed_image_url;
+                loadingModal.hide();
             })
             .catch(error => {
                 showError(error.message);
-            })
-            .finally(() => {
                 loadingModal.hide();
             });
         });
