@@ -124,8 +124,9 @@ def register_routes(app):
             
         # Get original filename without extension
         original_name = os.path.splitext(processed_image.original_filename)[0]
-        # Get palette name from relationship
-        palette_name = processed_image.palette.name.lower().replace(' ', '-')
+        # Get palette name from actual palette file
+        palette = get_palette_by_id(processed_image.palette_id)
+        palette_name = palette.name.lower().replace(' ', '-')
         # Format the download filename
         download_filename = f"{original_name}_{palette_name}_{processed_image.quantization_mode}.png"
         
