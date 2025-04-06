@@ -5,8 +5,6 @@
   padding: var(--md-space-3);
   width: 100%;
   box-sizing: border-box;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 /* Better handling of small screens */
@@ -20,66 +18,174 @@
     height: 56px;
     padding: 0 var(--md-space-2);
   }
-  
-  /* Ensure cards are full width on mobile */
+
+  .md-top-app-bar-title {
+    font-size: 1.125rem;
+  }
+
+  /* Make sure cards don't overflow */
   .md-card {
     width: 100%;
-  }
-}
-
-/* Make entire app content centered */
-.md-grid {
-  display: flex;
-  flex-wrap: wrap;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-  max-width: 1200px;
-}
-
-/* Base grid column settings */
-.md-grid-col {
-  width: 100%;
-  padding: 0 8px;
-  box-sizing: border-box;
-}
-
-/* Medium and larger screens (desktop) grid classes */
-@media (min-width: 600px) {
-  /* Responsive grid columns for medium displays */
-  .md-grid-col-md-1 { width: 8.333333%; }
-  .md-grid-col-md-2 { width: 16.666667%; }
-  .md-grid-col-md-3 { width: 25%; }
-  .md-grid-col-md-4 { width: 33.333333%; }
-  .md-grid-col-md-5 { width: 41.666667%; }
-  .md-grid-col-md-6 { width: 50%; }
-  .md-grid-col-md-7 { width: 58.333333%; }
-  .md-grid-col-md-8 { width: 66.666667%; }
-  .md-grid-col-md-9 { width: 75%; }
-  .md-grid-col-md-10 { width: 83.333333%; }
-  .md-grid-col-md-11 { width: 91.666667%; }
-  .md-grid-col-md-12 { width: 100%; }
-  
-  /* Order classes for responsive layouts */
-  .md-order-md-1 { order: 1; }
-  .md-order-md-2 { order: 2; }
-  .md-order-md-3 { order: 3; }
-  .md-order-md-4 { order: 4; }
-  .md-order-md-5 { order: 5; }
-  
-  /* Card spacing for desktop */
-  .md-card {
-    margin-bottom: var(--md-space-4);
+    margin-bottom: var(--md-space-3);
   }
 
-  /* Specialized layout fixes */
-  .md-content-wrapper {
-    max-width: 1200px;
-    margin: 0 auto;
+  .md-card-body,
+  .md-card-header {
+    padding: var(--md-space-3);
+  }
+
+  /* Properly stack columns on mobile */
+  .md-grid {
+    margin: 0;
+  }
+
+  .md-grid-col {
+    padding: 0;
+    margin-bottom: var(--md-space-3);
+  }
+
+  /* Adjust dropzone for smaller screens */
+  .md-dropzone {
+    min-height: 120px;
+    padding: var(--md-space-3);
+  }
+
+  /* Fix button sizes */
+  .md-button {
+    min-width: unset;
     padding: 0 var(--md-space-3);
   }
+
+  /* Adjust form controls */
+  .md-select-outline,
+  .md-text-field-outline {
+    height: 48px;
+  }
+
+  /* Better modal positioning */
+  .md-modal-dialog {
+    width: 95%;
+    max-width: 100%;
+  }
+}
+
+/* Small tablets and large phones */
+@media (min-width: 600px) and (max-width: 959px) {
+  .md-container {
+    padding: var(--md-space-4);
+  }
+
+  /* Keep some horizontal padding */
+  .md-grid {
+    margin: 0 -6px;
+  }
+
+  .md-grid-col {
+    padding: 0 6px;
+    margin-bottom: var(--md-space-3);
+  }
+}
+
+/* Medium-sized tablets and small laptops */
+@media (min-width: 960px) and (max-width: 1279px) {
+  .md-container {
+    max-width: 940px;
+  }
+}
+
+/* Larger screens */
+@media (min-width: 1280px) {
+  .md-container {
+    max-width: 1140px;
+  }
+}
+
+/* Reusable responsive utilities */
+.md-hide-xs {
+  display: none !important;
+}
+
+@media (min-width: 600px) {
+  .md-hide-xs {
+    display: initial !important;
+  }
   
-  /* Display/responsive utilities */
+  .md-hide-sm-up {
+    display: none !important;
+  }
+}
+
+/* Fix for large content overflow */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix iOS form elements */
+input,
+select,
+textarea {
+  font-size: 16px !important; /* Prevents iOS zoom on focus */
+}
+
+/* Improve tap targets for mobile */
+.md-navigation-link,
+.md-button,
+select,
+input {
+  min-height: 44px; /* Recommended minimum touch target size */
+}
+
+/* Improve mobile scrolling */
+.md-modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for devices with notches */
+@supports (padding: max(0px)) {
+  .md-container {
+    padding-left: max(var(--md-space-3), env(safe-area-inset-left));
+    padding-right: max(var(--md-space-3), env(safe-area-inset-right));
+  }
+  
+  /* Adjust padding for the top app bar */
+  .md-top-app-bar {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  /* Adjust padding for modal dialogs */
+  .md-modal-dialog {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* Flex reordering for mobile */
+@media (max-width: 599px) {
+  .md-order-1 { order: 1; }
+  .md-order-2 { order: 2; }
+  .md-order-3 { order: 3; }
+}
+
+/* Fix for hover effects on touch devices */
+@media (hover: none) {
+  .md-button:hover {
+    background-color: initial;
+  }
+  
+  .md-card:hover {
+    transform: none;
+  }
+}
+
+/* Responsive utility classes for order, display, and positioning */
+@media (min-width: 600px) {
+  .md-order-md-1 { order: 1 !important; }
+  .md-order-md-2 { order: 2 !important; }
+  .md-order-md-3 { order: 3 !important; }
+  
   .md-d-md-none { display: none !important; }
   .md-d-md-block { display: block !important; }
   .md-d-md-flex { display: flex !important; }
@@ -87,7 +193,7 @@
   .md-d-md-inline-block { display: inline-block !important; }
 }
 
-/* Responsive utility classes for order, display, and positioning */
+/* Additional utility classes for common screen sizes */
 .md-w-auto { width: auto !important; }
 .md-h-auto { height: auto !important; }
 
