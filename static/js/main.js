@@ -14,8 +14,8 @@ const palettePreview = document.getElementById('palette-preview');
 const importPaletteLink = document.getElementById('import-palette-link');
 const importPaletteInput = document.getElementById('import-palette-file');
 const fileSelect = document.getElementById('fileSelect');
-const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal')); //Corrected selector
-
+const loadingModalElement = document.getElementById('loadingModal');
+const loadingModal = new bootstrap.Modal(loadingModalElement);
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
@@ -157,12 +157,20 @@ function setupProcessing() {
                 document.getElementById('result-container').innerHTML = `<img src="${data.processed_image_url}" alt="Processed Image">`;
                 document.getElementById('download-container').style.display = 'block';
                 document.getElementById('download-link').href = data.processed_image_url;
+                
+                // Make sure the loading modal is hidden
+                if (loadingModalElement && loadingModalElement.classList.contains('show')) {
+                    loadingModal.hide();
+                }
             })
             .catch(error => {
                 showError(error.message);
             })
             .finally(() => {
-                loadingModal.hide();
+                // Ensure the loading modal is hidden in all cases
+                if (loadingModalElement && loadingModalElement.classList.contains('show')) {
+                    loadingModal.hide();
+                }
             });
         });
     }
@@ -228,7 +236,6 @@ function clearFileInput() {
     if (processButton) processButton.disabled = true;
 }
 
-//This part is kept from the original code because it's not directly addressed in the edited snippet and is still relevant
 // Update quantization description when mode is changed
 if (quantizationSelect && quantizationDescription) {
     quantizationSelect.addEventListener('change', () => {
