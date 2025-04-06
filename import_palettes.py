@@ -5,10 +5,8 @@ from palette_manager import import_default_palettes
 
 def main():
     """Import default palettes into the database."""
-    with app.app_context():
-        # Clear existing palettes if needed
-        # Palette.query.delete()
-        # db.session.commit()
+    # Clear existing palettes if needed
+    if Palette.query.count() == 0:
         
         # Get all .hex files in the palettes directory
         palettes_dir = app.config['UPLOADED_PALETTES_DEST']
