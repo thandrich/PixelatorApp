@@ -48,6 +48,6 @@ with app.app_context():
     from routes import register_routes
     register_routes(app)
     
-    # Import default palettes into the database
+    # Load palettes from the palettes directory into memory
     from import_palettes import main as import_palettes
     import_palettes()
