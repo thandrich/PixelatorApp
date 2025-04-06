@@ -122,17 +122,14 @@ def import_default_palettes(palette_files, palettes_dir):
     count = 0
     
     for name, path in palette_files:
-        # Check if the palette already exists
         filename = os.path.basename(path)
-        if Palette.query.filter_by(filename=filename).first():
-            continue
         
         # Create a new palette record
         palette = Palette(
             name=name,
             filename=filename,
             description=f"Default {name} palette",
-            is_default=True if count == 0 else False  # First palette is default
+            is_default=True  # All palettes from files are marked as default
         )
         
         # Add the palette to the database
