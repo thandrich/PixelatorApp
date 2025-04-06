@@ -18,8 +18,31 @@
 </div>
 
 <div class="md-grid">
-    <!-- Left Column - Upload and Settings -->
-    <div class="md-grid-col md-grid-col-12 md-grid-col-md-4">
+    <!-- Result Card (On top for mobile) -->
+    <div class="md-grid-col md-grid-col-12 md-grid-col-md-8 md-order-2 md-order-md-1">
+        <div class="md-card md-shadow-1 md-mb-4">
+            <div class="md-card-header">
+                <h2 class="md-card-title md-d-flex md-align-center">
+                    <span class="material-symbols-outlined md-mr-2">palette</span>
+                    Result
+                </h2>
+            </div>
+            <div class="md-card-body">
+                <div id="result-container" class="md-text-center">
+                    <p class="md-text-body-medium md-text-secondary">Processed image will appear here</p>
+                </div>
+                <div id="download-container" class="md-text-center md-mt-4" style="display: none;">
+                    <a id="download-link" class="md-button md-button-filled" download>
+                        <span class="material-symbols-outlined">download</span>
+                        Download Image
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Left Column - Upload and Settings (First for mobile) -->
+    <div class="md-grid-col md-grid-col-12 md-grid-col-md-4 md-order-1 md-order-md-2">
         <!-- Upload Card -->
         <div class="md-card md-shadow-1 md-mb-4">
             <div class="md-card-header">
@@ -119,35 +142,21 @@
                         <span class="material-symbols-outlined">auto_awesome</span>
                         Process Image
                     </button>
+                    
+                    <!-- Import Palette (Mobile position) -->
+                    <div class="md-text-center md-mt-4 md-d-block md-d-md-none">
+                        <button id="import-palette-link-mobile" class="md-button md-button-tonal md-button-small">
+                            <span class="material-symbols-outlined">color_lens</span>
+                            Import Palette
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Right Column - Result and Info -->
-    <div class="md-grid-col md-grid-col-12 md-grid-col-md-8">
-        <!-- Result Card -->
-        <div class="md-card md-shadow-1 md-mb-4">
-            <div class="md-card-header">
-                <h2 class="md-card-title md-d-flex md-align-center">
-                    <span class="material-symbols-outlined md-mr-2">palette</span>
-                    Result
-                </h2>
-            </div>
-            <div class="md-card-body">
-                <div id="result-container" class="md-text-center">
-                    <p class="md-text-body-medium md-text-secondary">Processed image will appear here</p>
-                </div>
-                <div id="download-container" class="md-text-center md-mt-4" style="display: none;">
-                    <a id="download-link" class="md-button md-button-filled" download>
-                        <span class="material-symbols-outlined">download</span>
-                        Download Image
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- About Card -->
+    <!-- About Card -->
+    <div class="md-grid-col md-grid-col-12 md-order-3">
         <div class="md-card md-shadow-1">
             <div class="md-card-header">
                 <h2 class="md-card-title md-d-flex md-align-center">
@@ -156,34 +165,38 @@
                 </h2>
             </div>
             <div class="md-card-body">
-                <p class="md-text-body-medium">
-                    Pixel art is a form of digital art where images are created and edited at the pixel level. 
-                    It has its roots in early video games and computer systems with limited graphical capabilities.
-                </p>
-                
-                <h3 class="md-text-title-medium md-mt-4 md-mb-2">Key Characteristics:</h3>
-                <ul class="md-text-body-medium">
-                    <li>Limited color palettes</li>
-                    <li>Deliberate placement of individual pixels</li>
-                    <li>Clean, crisp edges</li>
-                    <li>Stylized representation of subjects</li>
-                </ul>
-                
-                <h3 class="md-text-title-medium md-mt-4 md-mb-2">How It Works:</h3>
-                <ol class="md-text-body-medium">
-                    <li>Downscaling your image to create pixelation</li>
-                    <li>Applying color quantization to limit the color palette</li>
-                    <li>Optionally upscaling the result to emphasize the pixel style</li>
-                </ol>
-                
-                <div class="md-divider"></div>
-                
-                <div class="md-text-center">
-                    <button id="import-palette-link" class="md-button md-button-tonal md-button-small">
-                        <span class="material-symbols-outlined">color_lens</span>
-                        Import Additional Palettes
-                    </button>
-                    <input type="file" id="import-palette-file" accept=".hex,.txt" class="md-d-none">
+                <div class="md-grid">
+                    <div class="md-grid-col md-grid-col-12 md-grid-col-md-8">
+                        <p class="md-text-body-medium">
+                            Pixel art is a form of digital art where images are created and edited at the pixel level. 
+                            It has its roots in early video games and computer systems with limited graphical capabilities.
+                        </p>
+                        
+                        <h3 class="md-text-title-medium md-mt-4 md-mb-2">Key Characteristics:</h3>
+                        <ul class="md-text-body-medium">
+                            <li>Limited color palettes</li>
+                            <li>Deliberate placement of individual pixels</li>
+                            <li>Clean, crisp edges</li>
+                            <li>Stylized representation of subjects</li>
+                        </ul>
+                        
+                        <h3 class="md-text-title-medium md-mt-4 md-mb-2">How It Works:</h3>
+                        <ol class="md-text-body-medium">
+                            <li>Downscaling your image to create pixelation</li>
+                            <li>Applying color quantization to limit the color palette</li>
+                            <li>Optionally upscaling the result to emphasize the pixel style</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="md-grid-col md-grid-col-12 md-grid-col-md-4 md-d-flex md-align-center md-justify-center">
+                        <div class="md-hide-xs md-text-center">
+                            <button id="import-palette-link" class="md-button md-button-tonal">
+                                <span class="material-symbols-outlined">color_lens</span>
+                                Import Additional Palettes
+                            </button>
+                            <input type="file" id="import-palette-file" accept=".hex,.txt" class="md-d-none">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -234,5 +247,18 @@
     window.serverData = {
         quantizationModes: {{ quantization_modes|tojson }}
     };
+    
+    // Set up mobile import palette button
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileImportBtn = document.getElementById('import-palette-link-mobile');
+        const importPaletteInput = document.getElementById('import-palette-file');
+        
+        if (mobileImportBtn && importPaletteInput) {
+            mobileImportBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                importPaletteInput.click();
+            });
+        }
+    });
 </script>
 {% endblock %}

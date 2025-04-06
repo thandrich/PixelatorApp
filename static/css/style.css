@@ -228,3 +228,95 @@
 #import-palette-link {
   transition: all var(--md-duration-short) var(--md-easing-standard);
 }
+
+/* Mobile-specific improvements */
+@media (max-width: 599px) {
+  /* Smaller drop area for mobile */
+  .md-dropzone {
+    padding: var(--md-space-3);
+    min-height: 130px;
+  }
+  
+  /* Smaller preview size on mobile */
+  #preview img {
+    max-height: 150px;
+  }
+  
+  /* Improve touch feedback */
+  .md-button:active {
+    opacity: 0.8;
+  }
+  
+  /* Adjust card spacing for mobile */
+  .md-card {
+    margin-bottom: var(--md-space-3);
+  }
+  
+  /* Better select dropdown on mobile */
+  .md-select-input {
+    padding-right: 30px; /* Make room for the arrow icon */
+  }
+  
+  /* Improved color swatches for mobile */
+  .md-palette-container {
+    justify-content: center;
+  }
+}
+
+/* Improve modal positioning on mobile */
+@media (max-width: 599px) {
+  .md-modal-dialog {
+    margin: var(--md-space-2);
+    max-height: 90vh;
+  }
+  
+  .md-modal-body {
+    padding: var(--md-space-3);
+  }
+  
+  .md-loading-spinner {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Better focus styles for accessibility */
+.md-button:focus-visible,
+.md-select-input:focus-visible {
+  outline: 2px solid var(--md-primary);
+  outline-offset: 2px;
+}
+
+/* Fix touch delay on mobile */
+* {
+  touch-action: manipulation;
+}
+
+/* Make sure previews are centered */
+#preview, #result-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Add smooth animations for better UX */
+.md-dropzone,
+#preview img,
+.md-button,
+.md-card,
+.color-swatch {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Fix loading modal for mobile */
+@media (max-width: 599px) {
+  #loadingModal .md-button {
+    margin-top: var(--md-space-2);
+    width: 100%;
+  }
+  
+  #errorModal .md-button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,290 @@
+/* Responsive overrides for Material Design 3 - Mobile First Approach */
+
+/* Base styles for mobile devices */
+.md-container {
+  padding: var(--md-space-3);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Better handling of small screens */
+@media (max-width: 599px) {
+  body {
+    font-size: 14px;
+  }
+
+  /* Adjust top app bar for mobile */
+  .md-top-app-bar-row {
+    height: 56px;
+    padding: 0 var(--md-space-2);
+  }
+
+  .md-top-app-bar-title {
+    font-size: 1.125rem;
+  }
+
+  /* Make sure cards don't overflow */
+  .md-card {
+    width: 100%;
+    margin-bottom: var(--md-space-3);
+  }
+
+  .md-card-body,
+  .md-card-header {
+    padding: var(--md-space-3);
+  }
+
+  /* Properly stack columns on mobile */
+  .md-grid {
+    margin: 0;
+  }
+
+  .md-grid-col {
+    padding: 0;
+    margin-bottom: var(--md-space-3);
+  }
+
+  /* Adjust dropzone for smaller screens */
+  .md-dropzone {
+    min-height: 120px;
+    padding: var(--md-space-3);
+  }
+
+  /* Fix button sizes */
+  .md-button {
+    min-width: unset;
+    padding: 0 var(--md-space-3);
+  }
+
+  /* Adjust form controls */
+  .md-select-outline,
+  .md-text-field-outline {
+    height: 48px;
+  }
+
+  /* Better modal positioning */
+  .md-modal-dialog {
+    width: 95%;
+    max-width: 100%;
+  }
+}
+
+/* Small tablets and large phones */
+@media (min-width: 600px) and (max-width: 959px) {
+  .md-container {
+    padding: var(--md-space-4);
+  }
+
+  /* Keep some horizontal padding */
+  .md-grid {
+    margin: 0 -6px;
+  }
+
+  .md-grid-col {
+    padding: 0 6px;
+    margin-bottom: var(--md-space-3);
+  }
+}
+
+/* Medium-sized tablets and small laptops */
+@media (min-width: 960px) and (max-width: 1279px) {
+  .md-container {
+    max-width: 940px;
+  }
+}
+
+/* Larger screens */
+@media (min-width: 1280px) {
+  .md-container {
+    max-width: 1140px;
+  }
+}
+
+/* Reusable responsive utilities */
+.md-hide-xs {
+  display: none !important;
+}
+
+@media (min-width: 600px) {
+  .md-hide-xs {
+    display: initial !important;
+  }
+  
+  .md-hide-sm-up {
+    display: none !important;
+  }
+}
+
+/* Fix for large content overflow */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix iOS form elements */
+input,
+select,
+textarea {
+  font-size: 16px !important; /* Prevents iOS zoom on focus */
+}
+
+/* Improve tap targets for mobile */
+.md-navigation-link,
+.md-button,
+select,
+input {
+  min-height: 44px; /* Recommended minimum touch target size */
+}
+
+/* Improve mobile scrolling */
+.md-modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for devices with notches */
+@supports (padding: max(0px)) {
+  .md-container {
+    padding-left: max(var(--md-space-3), env(safe-area-inset-left));
+    padding-right: max(var(--md-space-3), env(safe-area-inset-right));
+  }
+  
+  /* Adjust padding for the top app bar */
+  .md-top-app-bar {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  /* Adjust padding for modal dialogs */
+  .md-modal-dialog {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+/* Flex reordering for mobile */
+@media (max-width: 599px) {
+  .md-order-1 { order: 1; }
+  .md-order-2 { order: 2; }
+  .md-order-3 { order: 3; }
+}
+
+/* Fix for hover effects on touch devices */
+@media (hover: none) {
+  .md-button:hover {
+    background-color: initial;
+  }
+  
+  .md-card:hover {
+    transform: none;
+  }
+}
+
+/* Responsive utility classes for order, display, and positioning */
+@media (min-width: 600px) {
+  .md-order-md-1 { order: 1 !important; }
+  .md-order-md-2 { order: 2 !important; }
+  .md-order-md-3 { order: 3 !important; }
+  
+  .md-d-md-none { display: none !important; }
+  .md-d-md-block { display: block !important; }
+  .md-d-md-flex { display: flex !important; }
+  .md-d-md-inline { display: inline !important; }
+  .md-d-md-inline-block { display: inline-block !important; }
+}
+
+/* Additional utility classes for common screen sizes */
+.md-w-auto { width: auto !important; }
+.md-h-auto { height: auto !important; }
+
+/* Fix for select elements on Safari mobile */
+@supports (-webkit-touch-callout: none) {
+  select,
+  textarea,
+  input {
+    font-size: 16px !important;
+  }
+  
+  .md-select-outline {
+    background-color: var(--md-surface);
+  }
+}
+
+/* Improved card and button styles for touch interfaces */
+@media (hover: none) {
+  .md-button {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  
+  .md-card {
+    margin-bottom: 16px;
+  }
+  
+  /* Increase tap target sizes */
+  .color-swatch {
+    width: 32px;
+    height: 32px;
+    margin: 3px;
+  }
+}
+
+/* Add touch ripple effect */
+.md-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.md-button:after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform .5s, opacity 1s;
+}
+
+.md-button:active:after {
+  transform: scale(0, 0);
+  opacity: .2;
+  transition: 0s;
+}
+
+/* Fix iOS 100vh issue */
+@supports (-webkit-touch-callout: none) {
+  .md-modal {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Improve handling of very small screens */
+@media (max-width: 359px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .md-card-title {
+    font-size: 1.1rem;
+  }
+  
+  .md-top-app-bar-row {
+    padding: 0 var(--md-space-1);
+  }
+  
+  .md-button {
+    padding: 0 var(--md-space-2);
+    font-size: 0.75rem;
+  }
+  
+  .md-button .material-symbols-outlined {
+    font-size: 1rem;
+  }
+}
