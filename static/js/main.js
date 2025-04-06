@@ -166,7 +166,22 @@ function handlePaletteImport() {
             paletteSelect.add(option);
             paletteSelect.value = data.id;
             loadPaletteSwatches(data.id);
-            alert(`Palette "${data.name}" imported successfully!`);
+            
+            // Add a subtle visual feedback instead of an alert
+            const importLink = document.getElementById('import-palette-link');
+            if (importLink) {
+                const originalText = importLink.textContent;
+                importLink.textContent = '✓ Palette Imported';
+                importLink.classList.add('btn-success');
+                importLink.classList.remove('btn-secondary');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    importLink.textContent = originalText;
+                    importLink.classList.remove('btn-success');
+                    importLink.classList.add('btn-secondary');
+                }, 2000);
+            }
         })
         .catch(error => {
             showError(error.message);
