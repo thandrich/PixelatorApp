@@ -1,7 +1,7 @@
 import os
 import logging
 
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.utils import secure_filename
@@ -30,6 +30,9 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
+# Set an appropriate session timeout (1 day by default)
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 hours in seconds
+
 # Create upload directories if they don't exist
 os.makedirs(app.config['UPLOADED_PHOTOS_DEST'], exist_ok=True)
 os.makedirs(app.config['UPLOADED_PALETTES_DEST'], exist_ok=True)
@@ -51,3 +54,18 @@ with app.app_context():
     # Load palettes from the palettes directory into memory
     from import_palettes import main as import_palettes
     import_palettes()
+    
+    # Import session manager
+    import session_manager
+    
+    # Clean temporary directories on startup
+    session_manager.cleanup_temp_directories(app.config)
+
+# Register session cleanup when the app closes a request
+@app.teardown_request
+def cleanup_after_request(exception=None):
+    """Cleanup temporary files when a session ends."""
+    if 'session_id' in session and session.get('_session_expired', False):
+        # Clean up only expired sessions
+        session_manager.cleanup_session(session['session_id'])
+        session.pop('_session_expired', None)

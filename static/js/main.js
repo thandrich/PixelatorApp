@@ -3,6 +3,26 @@ let paletteDialogOpened = false;
 let lastValidImageFile = null;
 let isProcessing = false; // Flag to track processing state
 
+// Clean up session when page is unloaded
+window.addEventListener('beforeunload', () => {
+    // Attempt to clean up session when user leaves
+    cleanupSession();
+});
+
+// Function to clean up session data
+function cleanupSession() {
+    // Use navigator.sendBeacon for reliable delivery even when page is unloading
+    if (navigator.sendBeacon) {
+        navigator.sendBeacon('/cleanup-session');
+    } else {
+        // Fallback to fetch for older browsers
+        fetch('/cleanup-session', {
+            method: 'POST',
+            keepalive: true
+        }).catch(e => console.error('Error cleaning up session:', e));
+    }
+}
+
 // DOM Elements
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize elements

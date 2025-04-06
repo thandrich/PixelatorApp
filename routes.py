@@ -1,12 +1,13 @@
 import os
 import uuid
-from flask import render_template, request, jsonify, send_from_directory, url_for, redirect, flash
+from flask import render_template, request, jsonify, send_from_directory, url_for, redirect, flash, session
 from werkzeug.utils import secure_filename
 from app import db
 from models import ProcessedImage
 from image_processor import process_image
 from palette_manager import get_all_palettes, get_palette_by_id, get_palette_colors, add_palette
 from utils import allowed_file, parse_resolution
+import session_manager
 
 def register_routes(app):
     """Register all routes with the Flask app."""
@@ -59,10 +60,16 @@ def register_routes(app):
         palette = get_palette_by_id(palette_id)
         if not palette:
             return jsonify({'error': 'Invalid palette selected'}), 400
+        
+        # Generate session ID if not present
+        if 'session_id' not in session:
+            session['session_id'] = str(uuid.uuid4())
             
-        # Save the uploaded file
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], filename)
+        session_id = session['session_id']
+            
+        # Save the uploaded file to a temp location
+        temp_filename = f"{str(uuid.uuid4())}.{file.filename.split('.')[-1]}"
+        filepath = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], temp_filename)
         file.save(filepath)
         
         try:
@@ -84,11 +91,15 @@ def register_routes(app):
             # Debug log for processing completion
             app.logger.debug(f"Completed image processing with mode: {quantization_mode}")
             
-            # Save the processed image record
+            # Track the processed file in the session
+            processed_filepath = os.path.join(app.config['PROCESSED_IMAGES_DEST'], processed_filename)
+            session_manager.add_processed_image(session_id, processed_filepath)
+            
+            # Save a temporary record for the download
             processed_image = ProcessedImage(
-                original_filename=filename,
+                original_filename=file.filename,  # Use original filename for display
                 processed_filename=processed_filename,
-                palette_id=int(palette.id),  # Convert string ID to int for DB
+                palette_id=int(palette.id),
                 quantization_mode=quantization_mode,
                 max_resolution=max_resolution,
                 upscale_factor=upscale_factor
@@ -99,18 +110,32 @@ def register_routes(app):
             # Debug log for database update
             app.logger.debug(f"Saved processed image record with mode: {quantization_mode}")
             
+            # Remove the temporary uploaded file
+            try:
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+            except Exception as e:
+                app.logger.error(f"Error removing temporary upload: {str(e)}")
+            
             # Return the processed image details
             result = {
                 'success': True,
                 'processed_image_id': processed_image.id,
                 'processed_image_url': url_for('download_file', filename=processed_filename),
                 'palette_name': palette.name,
-                'quantization_mode': quantization_mode  # Add this to help debug
+                'quantization_mode': quantization_mode
             }
             
             app.logger.debug(f"Returning result for mode: {quantization_mode}, data: {result}")
             return jsonify(result)
         except Exception as e:
+            # Cleanup the uploaded file on error
+            try:
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+            except:
+                pass
+                
             app.logger.error(f"Error processing image with mode {quantization_mode}: {str(e)}")
             return jsonify({'error': str(e)}), 500
     
@@ -178,6 +203,12 @@ def register_routes(app):
         if not file.filename.endswith(('.hex', '.txt')):
             return jsonify({'error': 'Invalid file format. Please upload a .hex or .txt file.'}), 400
             
+        # Generate session ID if not present
+        if 'session_id' not in session:
+            session['session_id'] = str(uuid.uuid4())
+            
+        session_id = session['session_id']
+            
         # Get palette name from form or use filename without extension
         name = request.form.get('name', file.filename.rsplit('.', 1)[0])
         description = request.form.get('description', f"Custom palette: {name}")
@@ -193,6 +224,10 @@ def register_routes(app):
         
         if not palette:
             return jsonify({'error': 'Failed to import palette'}), 500
+            
+        # Track the palette in the user's session
+        palette_path = os.path.join(app.config['UPLOADED_PALETTES_DEST'], palette.filename)
+        session_manager.add_temp_palette(session_id, palette_path)
             
         # Return the imported palette details
         return jsonify({
@@ -210,3 +245,14 @@ def register_routes(app):
     def server_error(e):
         """Handle 500 errors."""
         return render_template('error.html', error=str(e), code=500), 500
+        
+    @app.route('/cleanup-session', methods=['POST'])
+    def cleanup_user_session():
+        """Clean up all temporary files associated with the current session."""
+        if 'session_id' in session:
+            session_id = session['session_id']
+            session_manager.cleanup_session(session_id)
+            # Mark the session as ready to be recreated
+            session.pop('session_id', None)
+            return jsonify({'success': True, 'message': 'Session cleared successfully'})
+        return jsonify({'success': False, 'message': 'No active session to clean up'})
