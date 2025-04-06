@@ -1,12 +1,11 @@
 import os
-from app import app, db
-from models import Palette
-from palette_manager import import_default_palettes
+from app import app
+from in_memory_palette_manager import palette_manager
 
 def main():
-    """Import default palettes into the database."""
-    # Clear existing palettes if needed
-    if Palette.query.count() == 0:
+    """Import default palettes into memory."""
+    # Only import if no palettes exist
+    if not palette_manager.palettes:
         
         # Get all .hex files in the palettes directory
         palettes_dir = app.config['UPLOADED_PALETTES_DEST']
@@ -19,7 +18,7 @@ def main():
                 palette_files.append((name, path))
         
         # Import the palettes
-        count = import_default_palettes(palette_files, palettes_dir)
+        count = palette_manager.import_default_palettes(palette_files, palettes_dir)
         print(f"Imported {count} palettes.")
 
 if __name__ == '__main__':

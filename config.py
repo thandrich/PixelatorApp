@@ -5,9 +5,6 @@ class Config:
     DEBUG = False
     TESTING = False
     
-    # Use SQLite for development
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///pixel_art.db'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.environ.get('SESSION_SECRET', 'pixel-art-secret-key')
     
     # File upload settings
@@ -49,7 +46,6 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///test_pixel_art.db'
 
 class ProductionConfig(Config):
     """Production configuration."""

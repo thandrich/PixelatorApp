@@ -1,5 +1,6 @@
 // Global variables
-let paletteDialogOpened = false;
+// Note: These variables are initialized at the beginning to avoid duplicate declarations
+let paletteDialogOpened = false;  // Will be controlled through functions
 let lastValidImageFile = null;
 
 // DOM Elements
