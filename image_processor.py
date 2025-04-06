@@ -122,8 +122,9 @@ def quantize_with_edge_emphasis(image, palette_path):
         # Convert the image to the palette
         quantized_img = enhanced_img.quantize(palette=palette_img, dither=Image.FLOYDSTEINBERG)
         
-        # Convert back to RGB for consistency
-        return quantized_img.convert('RGB')
+        # Convert back to RGB and return as numpy array for consistency with other modes
+        rgb_img = quantized_img.convert('RGB')
+        return Image.fromarray(np.array(rgb_img))
     except Exception as e:
         logging.error(f"Error quantizing image with edge emphasis: {str(e)}")
         raise
