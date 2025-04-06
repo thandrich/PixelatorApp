@@ -1,8 +1,10 @@
 import os
 from flask import render_template, request, jsonify, send_from_directory, url_for, redirect, flash
 from werkzeug.utils import secure_filename
+from app import db
+from models import Palette, ProcessedImage
 from image_processor import process_image
-from in_memory_palette_manager import palette_manager
+from palette_manager import get_all_palettes, get_palette_by_id, get_palette_colors, add_palette
 from utils import allowed_file, parse_resolution
 
 def register_routes(app):
@@ -11,7 +13,7 @@ def register_routes(app):
     @app.route('/')
     def index():
         """Render the main application page."""
-        palettes = palette_manager.get_all_palettes()
+        palettes = get_all_palettes()
         
         # Get the configuration for the frontend
         quantization_modes = app.config['QUANTIZATION_MODES']
@@ -50,7 +52,7 @@ def register_routes(app):
         upscale_factor = int(request.form.get('upscale_factor', app.config['DEFAULT_UPSCALE_FACTOR']))
         
         # Get the palette
-        palette = palette_manager.get_palette_by_id(palette_id)
+        palette = get_palette_by_id(palette_id)
         if not palette:
             return jsonify({'error': 'Invalid palette selected'}), 400
             
@@ -72,7 +74,7 @@ def register_routes(app):
             )
             
             # Save the processed image record
-            processed_image = palette_manager.add_processed_image(
+            processed_image = ProcessedImage(
                 original_filename=filename,
                 processed_filename=processed_filename,
                 palette_id=palette.id,
@@ -80,6 +82,8 @@ def register_routes(app):
                 max_resolution=max_resolution,
                 upscale_factor=upscale_factor
             )
+            db.session.add(processed_image)
+            db.session.commit()
             
             # Return the processed image details
             return jsonify({
@@ -100,13 +104,13 @@ def register_routes(app):
     @app.route('/palette/<int:palette_id>')
     def get_palette(palette_id):
         """Get information about a specific palette."""
-        palette = palette_manager.get_palette_by_id(palette_id)
+        palette = get_palette_by_id(palette_id)
         if not palette:
             return jsonify({'error': 'Palette not found'}), 404
             
         # Get the colors in the palette
         palette_path = os.path.join(app.config['UPLOADED_PALETTES_DEST'], palette.filename)
-        colors = palette_manager.get_palette_colors(palette_path)
+        colors = get_palette_colors(palette_path)
         
         return jsonify({
             'id': palette.id,
@@ -118,7 +122,7 @@ def register_routes(app):
     @app.route('/palettes')
     def get_palettes():
         """Get all available palettes."""
-        palettes = palette_manager.get_all_palettes()
+        palettes = get_all_palettes()
         return jsonify([palette.to_dict() for palette in palettes])
         
     @app.route('/palette/import', methods=['POST'])
@@ -143,7 +147,7 @@ def register_routes(app):
         description = request.form.get('description', f"Custom palette: {name}")
         
         # Add the palette to the database
-        palette = palette_manager.add_palette(
+        palette = add_palette(
             name=name,
             palette_file=file,
             description=description,
