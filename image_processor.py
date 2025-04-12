@@ -13,7 +13,7 @@ def hex_to_rgb(hex_color):
 
 def downscale_image(image_path, max_resolution=(512, 512)):
     """
-    Downscales an image to a maximum resolution while maintaining aspect ratio.
+    Downscales an image to a maximum resolution while maintaining aspect ratio and orientation.
 
     Args:
         image_path: The path to the image file.
@@ -26,6 +26,23 @@ def downscale_image(image_path, max_resolution=(512, 512)):
     try:
         # Open the image
         with Image.open(image_path) as img:
+            # Apply EXIF orientation
+            try:
+                exif = img._getexif()
+                if exif is not None:
+                    orientation = exif.get(274)  # 274 is the orientation tag
+                    if orientation is not None:
+                        # Rotation values to correct image orientation
+                        rotate_values = {
+                            3: 180,
+                            6: 270,
+                            8: 90
+                        }
+                        if orientation in rotate_values:
+                            img = img.rotate(rotate_values[orientation], expand=True)
+            except:
+                pass  # If EXIF data is corrupted or missing, proceed without rotation
+                
             # Convert to RGB if the image is in RGBA mode
             if img.mode == 'RGBA':
                 img = img.convert('RGB')
