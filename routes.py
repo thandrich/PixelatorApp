@@ -22,9 +22,26 @@ def register_routes(app):
         resolution_presets = app.config['RESOLUTION_PRESETS']
         upscale_factors = app.config['UPSCALE_FACTORS']
         
+        # Get palette colors for each palette
+        palettes_with_colors = []
+        for palette in palettes:
+            palette_path = os.path.join(app.config['UPLOADED_PALETTES_DEST'], palette.filename)
+            try:
+                # Get up to 5 colors for the dropdown preview
+                colors = get_palette_colors(palette_path)[:5]
+                palette_data = palette.to_dict()
+                palette_data['colors'] = colors
+                palettes_with_colors.append(palette_data)
+            except Exception as e:
+                app.logger.error(f"Error loading palette colors for {palette.name}: {str(e)}")
+                # Still include the palette but without colors
+                palette_data = palette.to_dict()
+                palette_data['colors'] = []
+                palettes_with_colors.append(palette_data)
+        
         return render_template(
             'index.html',
-            palettes=palettes,
+            palettes=palettes_with_colors,
             quantization_modes=quantization_modes,
             resolution_presets=resolution_presets,
             upscale_factors=upscale_factors

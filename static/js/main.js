@@ -41,6 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorModalElement = document.getElementById('errorModal');
     const cancelButton = document.getElementById('cancelProcessingBtn');
 
+    // Setup the palette select with color swatches
+    if (paletteSelect) {
+        setupPaletteSelectWithSwatches();
+    }
+
     // Load initial palette swatches if a palette is selected
     if (paletteSelect && paletteSelect.value) {
         loadPaletteSwatches(paletteSelect.value);
@@ -274,6 +279,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function setupPaletteSelectWithSwatches() {
+        // Use a custom select implementation to show color swatches in dropdown
+        const select = document.getElementById('palette');
+        
+        // First create hidden options with swatches for all options
+        for (let i = 0; i < select.options.length; i++) {
+            const option = select.options[i];
+            try {
+                // Get colors from the data attribute (added in template)
+                const colorsAttr = option.getAttribute('data-colors');
+                if (colorsAttr) {
+                    // Parse the colors from the JSON attribute
+                    const colors = JSON.parse(colorsAttr);
+                    
+                    // Store original option text to reuse
+                    const originalText = option.text;
+                    
+                    // Create a span to hold both text and swatches
+                    const container = document.createElement('span');
+                    container.className = 'option-with-swatches';
+                    
+                    // Add the palette name
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = originalText;
+                    container.appendChild(nameSpan);
+                    
+                    // Add color swatches (limited to 5)
+                    if (colors && colors.length > 0) {
+                        const swatchesContainer = document.createElement('span');
+                        swatchesContainer.className = 'option-swatches';
+                        
+                        // Show up to 5 colors
+                        const maxColors = Math.min(colors.length, 5);
+                        for (let j = 0; j < maxColors; j++) {
+                            const swatch = document.createElement('span');
+                            swatch.className = 'option-swatch';
+                            swatch.style.backgroundColor = `#${colors[j]}`;
+                            swatchesContainer.appendChild(swatch);
+                        }
+                        
+                        container.appendChild(swatchesContainer);
+                    }
+                    
+                    // Replace the option's text with our custom HTML
+                    // This is a hack, but it works in most browsers
+                    option.innerHTML = '';
+                    option.appendChild(container);
+                }
+            } catch (e) {
+                console.error('Error setting up palette swatches for option:', e);
+            }
+        }
+    }
+    
     function loadPaletteSwatches(paletteId) {
         fetch(`/palette/${paletteId}`)
             .then(response => {

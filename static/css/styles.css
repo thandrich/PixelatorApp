@@ -40,6 +40,25 @@ main {
     display: inline-block;
 }
 
+/* Dropdown with palette swatches */
+.option-with-swatches {
+    display: flex;
+    align-items: center;
+}
+
+.option-swatches {
+    display: flex;
+    margin-left: 8px;
+}
+
+.option-swatch {
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
 /* Image Display */
 #original-image, #processed-image {
     max-height: 400px;

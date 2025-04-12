@@ -59,7 +59,7 @@
                         <div class="md-select-outline">
                             <select class="md-select-input" id="palette" name="palette">
                                 {% for palette in palettes %}
-                                <option value="{{ palette.id }}">{{ palette.name }}</option>
+                                <option value="{{ palette.id }}" data-colors="{{ palette.colors|tojson }}">{{ palette.name }}</option>
                                 {% endfor %}
                             </select>
                             <span class="material-symbols-outlined md-select-arrow">expand_more</span>
