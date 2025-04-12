@@ -104,7 +104,7 @@
                         <div class="md-select-outline">
                             <select class="md-select-input" id="upscale_factor" name="upscale_factor">
                                 {% for factor in upscale_factors %}
-                                <option value="{{ factor }}" {% if factor == 1 %}selected{% endif %}>{{ factor }}x</option>
+                                <option value="{{ factor }}" {% if factor == 4 %}selected{% endif %}>{{ factor }}x</option>
                                 {% endfor %}
                             </select>
                             <span class="material-symbols-outlined md-select-arrow">expand_more</span>

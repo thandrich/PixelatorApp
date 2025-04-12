@@ -34,9 +34,9 @@ class Config:
     RESOLUTION_PRESETS = [
         {'value': '64,64', 'name': '64 x 64'},
         {'value': '128,128', 'name': '128 x 128'},
-        {'value': '256,256', 'name': '256 x 256', 'default': True},
-        {'value': '512,512', 'name': '512 x 512'},
-        {'value': '1024,1024', 'name': '1024 x 1024'}
+        {'value': '128,128', 'name': '128 x 128', 'default': True},
+        {'value': '256,256', 'name': '256 x 256'},
+        {'value': '512,512', 'name': '512 x 512'}
     ]
     
     # Upscale factors
